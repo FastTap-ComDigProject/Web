@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Preguntas</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Retro Gaming';
+            src: url('retrogaming.ttf') format('truetype');
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Retro Gaming', sans-serif;
+            background-color: #7b68ee;
+            /* Morado */
+            color: #fff;
+            /* Texto blanco */
+            display: grid;
+            grid-template-columns: 25% 75%;
+            /* Divide la página en dos columnas */
+        }
+
+        .marcador-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Ajusta la altura al 100% del viewport */
+            animation: fade-in 1s forwards;
+        }
+
+        .marcador-container .titulo h1 {
+            color: #fff;
+            /* Texto negro */
+        }
+
+        .participantes {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+            /* Espacio entre el título y los participantes */
+        }
+
+        .participante {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            /* Espacio entre participantes */
+        }
+
+        .info {
+            display: flex;
+            align-items: center;
+        }
+
+        .icono-container {
+            width: 40px;
+            /* Ancho del contenedor del icono */
+            height: 40px;
+            /* Altura del contenedor del icono */
+        }
+
+        .icono {
+            width: 100%;
+            /* Ajusta el tamaño del icono al contenedor */
+            height: auto;
+            /* Ajusta la altura automáticamente */
+        }
+
+        .datos {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nombre-puntaje {
+            display: flex;
+            align-items: center;
+            background-color: #9c27b0;
+            /* Fondo blanco */
+            border-radius: 5px;
+            /* Borde redondeado */
+        }
+
+        .nombre-puntaje:hover {
+            background-color: #7b1fa2;
+            /* Morado más oscuro al pasar el ratón */
+        }
+
+        .nombre,
+        .puntaje {
+            padding: 5px 20px;
+            /* Espacio dentro del rectángulo */
+            color: #ffffff;
+            /* Texto blanco */
+        }
+
+        .nombre {
+            margin-right: 5px;
+            /* Espacio entre el nombre y el puntaje */
+        }
+
+        /* Estilos de la página de pregunta */
+        .pregunta-container {
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+            opacity: 0;
+            animation: fade-in 1s forwards;
+            animation-delay: 0.5s;
+            /* Retraso de 0.5 segundos */
+        }
+
+        .pregunta-container h1 {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .pregunta-container h2 {
+            font-size: 36px;
+            margin-top: 40px;
+        }
+
+        .pregunta-container p {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 10px;
+        }
+
+        .answer {
+            padding: 10px;
+            background-color: #9c27b0;
+            /* Morado oscuro */
+            color: #ffffff;
+            /* Blanco */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .answer:hover {
+            background-color: #7b1fa2;
+            /* Morado más oscuro al pasar el ratón */
+        }
+
+        .participant {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            margin-top: 30px;
+        }
+
+        button,
+        .correcto-btn,
+        .error-btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #9c27b0;
+            /* Morado oscuro */
+            color: #ffffff;
+            /* Blanco */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+
+        button:hover,
+        .correcto-btn:hover,
+        .error-btn:hover {
+            background-color: #7b1fa2;
+            /* Morado más oscuro al pasar el ratón */
+        }
+
+        .correcto-btn,
+        .error-btn {
+            text-decoration: none;
+            /* Eliminar subrayado */
+            color: #ffffff;
+            /* Blanco */
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                /* Elemento completamente transparente al inicio */
+            }
+
+            to {
+                opacity: 1;
+                /* Elemento completamente visible al final */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="marcador-container">
+        <div class="titulo">
+            <h1>MARCADOR:</h1>
+        </div>
+        <div class="container">
+            <div class="participantes">
+                <div class="participante">
+                    <div class="info">
+                        <div class="icono-container">
+                            <img src="{{ url_for('static', filename='nave.png') }}" alt="Icono jugador 1" class="icono">
+                        </div>
+                        <div class="datos">
+                            <div class="nombre-puntaje">
+                                <div class="nombre">Participante 1</div>
+                                <div class="puntaje">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="participante">
+                    <div class="info">
+                        <div class="icono-container">
+                            <img src="{{ url_for('static', filename='nave.png') }}" alt="Icono jugador 1" class="icono">
+                        </div>
+                        <div class="datos">
+                            <div class="nombre-puntaje">
+                                <div id=nombre class="nombre"></div>
+                                <div class="puntaje">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="participante">
+                    <div class="info">
+                        <div class="icono-container">
+                            <img src="{{ url_for('static', filename='nave.png') }}" alt="Icono jugador 1" class="icono">
+                        </div>
+                        <div class="datos">
+                            <div class="nombre-puntaje">
+                                <div class="nombre">Participante 3</div>
+                                <div class="puntaje">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="participante">
+                    <div class="info">
+                        <div class="icono-container">
+                            <img src="{{ url_for('static', filename='nave.png') }}" alt="Icono jugador 1" class="icono">
+                        </div>
+                        <div class="datos">
+                            <div class="nombre-puntaje">
+                                <div class="nombre"></div>
+                                <div class="puntaje">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pregunta-container">
+        <h1 id="numeroPregunta">¡PREGUNTA NO. 1!</h1>
+        <p id="question"></p>
+        <div class="answers">
+            <div id="answer1" class="answer"></div>
+            <div id="answer2" class="answer"></div>
+            <div id="answer3" class="answer"></div>
+            <div id="answer4" class="answer"></div>
+        </div>
+
+        <div class="buttons">
+            <a class="correcto-btn" id="correct-btn">Siguiente</a>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '/Pagina3.html',
+                type: 'GET',
+                success: function (response) {
+                    console.log(response);
+                    // Aquí puedes usar los datos 'response' para actualizar tu frontend
+                    // Por ejemplo, si 'response' es un objeto con una propiedad 'nombres', podrías hacer:
+                    var nombres = response.nombres;
+                    console.log(response);
+                    $('#nombre').text(nombres[0]);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+
+
+        window.onload = function () {
+            fetch('/static/preguntas.txt')
+                .then(response => response.text())
+                .then(data => {
+                    let lineas = data.split('\n');
+                    var boton = document.getElementById('correct-btn');
+                    document.getElementById('question').innerText = lineas[0];
+                    let indice = 0;
+                    let numeroPregunta = 1;
+                    boton.addEventListener('click', function () {
+                        getData().then(cantidad_pre => {
+                            indice = indice + 5;
+                            if (indice < cantidad_pre * 5) {
+                                document.getElementById('question').innerText = lineas[indice];
+                                console.log('¡Botón pulsado!');
+                                // Incrementamos el número de la pregunta
+                                numeroPregunta++;
+                                // Actualizamos el texto del h1 con el nuevo número de pregunta
+                                document.getElementById('numeroPregunta').innerText = '¡PREGUNTA NO. ' + numeroPregunta + '!';
+                            } else {
+                                console.log('Se ha alcanzado el límite de líneas');
+                            }
+                        }).catch(error => {
+                            console.log(error);
+                        });
+                    });
+                })
+                .catch(error => console.error(error));
+            let indice = 1;
+            function cargarRespuestas() {
+                fetch('/static/preguntas.txt')
+                    .then(response => response.text())
+                    .then(data => {
+                        let lineas = data.split('\n');
+                        let j = 1;
+                        for (let i = indice; i < lineas.length && j <= 4; i++) {
+                            // Si la línea no es una pregunta (no termina en '?'), se considera una respuesta
+                            if (!lineas[i].endsWith('?')) {
+                                let esCorrecta = false;
+                                // Si la respuesta es correcta (comienza con '*'), se elimina el asterisco
+                                if (lineas[i].startsWith('*')) {
+                                    lineas[i] = lineas[i].substring(1);
+                                    esCorrecta = true;
+                                }
+                                let respuesta = document.getElementById('answer' + j);
+                                respuesta.innerText = lineas[i];
+                                respuesta.addEventListener('click', function () {
+                                    if (esCorrecta) {
+                                        console.log('La respuesta seleccionada es correcta.');
+                                    } else {
+                                        console.log('La respuesta seleccionada es incorrecta.');
+                                    }
+                                });
+                                j++;
+                            }
+                        }
+                        indice += 5;
+                    })
+                    .catch(error => console.error(error));
+            }
+
+            document.getElementById('correct-btn').addEventListener('click', cargarRespuestas);
+
+            // Cargar las primeras respuestas al inicio
+            cargarRespuestas();
+        };
+        function getData() {
+            return new Promise((resolve, reject) => {
+                $.get('/data', function (response) {
+                    var data = response.data;
+                    console.log("Dato recibido: " + data);  // Mensaje de depuración
+                }).fail(function () {
+                    console.log("Error al recibir datos");  // Mensaje de depuración
+                });
+                $.get('/datadb', function (response) {
+                    var datadb = response.datadb;
+                    console.log(datadb);
+                });
+                $.get('/line', function (response) {
+                    var line = response.line;
+                    var primerDigito = String(line)[1];
+                    resolve(primerDigito);  // Resuelve la promesa con cantidad_pre
+                }).fail(function () {
+                    console.log("Error al recibir datos de line");  // Mensaje de depuración
+                    reject("Error al recibir datos de line");
+                });
+            });
+        }
+
+
+        getData();
+        setInterval(getData, 10000);  // Asegúrate de que este intervalo es adecuado
+
+
+    </script>
+</body>
+
+</html>
