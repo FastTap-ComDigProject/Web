@@ -80,6 +80,7 @@ cursor_EstadisticasJugadores.execute('''
     CREATE TABLE data(
         id INTEGER PRIMARY KEY,
         Jugador INTEGER,
+        Nombre TEXT,
         Puntaje INTEGER,
     )
 ''')
@@ -93,7 +94,6 @@ cursor_PreguntasRespuestas.execute('''
         PosibleRespuesta2 TEXT,
         PosibleRespuesta3 TEXT,
         PosibleRespuesta4 TEXT,                                
-
     )
 ''')
 
@@ -101,19 +101,18 @@ conn_EstadisticasJugadores.commit()
 conn_PreguntasRespuestas.commit()
 
 def CargarPreguntasRespuestas(Ruta):
+    PosiblesRespuestas = ["","","",""]
+    contador = 0 # Incrementa con cada posible respuesta en la pregunta
     with open(Ruta, 'r') as archivo:
         for linea in archivo:
-            num_respuesta_correcta = 0 # Contiene la posicion de la respuesta correcta
-            contador = 0 # Incrementa con cada posible respuesta en la pregunta
-            Pregunta = linea[1:].strip() # Almacena pregunta sin guion
-
+            if not Pregunta:
+                Pregunta = linea.strip()
+            elif linea.startswith('*'):
+                # Si la línea comienza con un asterisco, guardamos el número de respuesta
+                numero_respuesta = int(linea[1])
+                respuestas[numero_respuesta - 1] = linea[2:]
             else:
-                num_respuestas += 1
-                if linea.startswith('*'): # Es la respuesta correcta si la línea comienza con un asterisco
-                    num_respuesta_correcta = contador
-
-                else: # Es una posible respuesta si no cumple con ninguna de las condiciones
-
+                # Si no es una línea de respuesta, continuamos con la siguiente
     conn_PreguntasRespuestas.commit()
 
 
