@@ -31,7 +31,7 @@ def RecepcionSerial():
             ByteSerial = int.from_bytes(Serial.read(), "big") # Leer primer byte entrante
             print(f"Valor byte: {ByteSerial}")
             if ByteSerial == 0: # Solicitar lista de usuarios conectados
-                EnvioSerial(1)
+                EnvioSerial(0)
             elif ByteSerial == 1: # Recibe nuevo usuario conectado
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
@@ -51,7 +51,7 @@ def RecepcionSerial():
 def EnvioSerial(var1):
             print(f"Enviando con identificador: {var1}")
             if var1 == 0: # Enviar lista de usuarios conectados
-                Serial.write(b'\x00' + UsuariosConectados + b'\xF0')
+                Serial.write(b'\x00' + UsuariosConectados)
             elif var1 == 1: # Enviar puntaje jugadores
                 Serial.write(b'\x01' + Usuario + PuntajeJugador)
             elif var1 == 2: # Iniciar nueva pregunta
@@ -88,8 +88,12 @@ cursor_PreguntasRespuestas.execute('''
     CREATE TABLE PreguntasRespuestas(
         id INTEGER PRIMARY KEY,
         Pregunta TEXT,
-        NumeroRespuestas INTEGER,
         NumeroRespuestaCorrecta INTEGER,
+        PosibleRespuesta1 TEXT,
+        PosibleRespuesta2 TEXT,
+        PosibleRespuesta3 TEXT,
+        PosibleRespuesta4 TEXT,                                
+
     )
 ''')
 
@@ -99,17 +103,15 @@ conn_PreguntasRespuestas.commit()
 def CargarPreguntasRespuestas(Ruta):
     with open(Ruta, 'r') as archivo:
         for linea in archivo:
-            if linea.startswith('-'): # Es pregunta si la línea comienza con un guion
-                num_respuesta_correcta = 0 # Contiene la posicion de la respuesta correcta
-                num_respuestas = 0 # Incrementa con cada posible respuesta en la pregunta
-                Pregunta = linea[1:].strip() # Almacena pregunta sin guion
+            num_respuesta_correcta = 0 # Contiene la posicion de la respuesta correcta
+            contador = 0 # Incrementa con cada posible respuesta en la pregunta
+            Pregunta = linea[1:].strip() # Almacena pregunta sin guion
 
             else:
                 num_respuestas += 1
                 if linea.startswith('*'): # Es la respuesta correcta si la línea comienza con un asterisco
-                    num_respuesta_correcta = num_respuestas
+                    num_respuesta_correcta = contador
 
-                    conn_PreguntasRespuestas.execute(f"PRAGMA table_info PreguntasRespuestas WHERE {str("")}")
                 else: # Es una posible respuesta si no cumple con ninguna de las condiciones
 
     conn_PreguntasRespuestas.commit()
