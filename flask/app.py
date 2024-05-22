@@ -10,6 +10,12 @@ import threading
 Baudios = 115200
 Puerto = 'COM11'
 
+UsuariosConectados = 0b00000000 # Esta variable almacenara en cada bit los usuarios conectados
+global Serial, PorcentajeBaterias, Usuario, PuntajeJugador, PuntajePregunta, NumeroPregunta, Posicion, Turno, PuestoFinal
+
+PorcentajeBaterias = [None] * 5 # Crea un vector vacio de 5 posiciones
+
+
 global integer_value
 
 integer_values = []
@@ -18,31 +24,48 @@ last_received_values = []
 app = Flask(__name__)
 
 def RecepcionSerial():
-    Serial = serial.Serial(Puerto, Baudios)
+    Serial = serial.Serial(Puerto, Baudios) 
 
     while True:
         if Serial.in_waiting > 0:
-            ByteSerial = int.from_bytes(Serial.read(), "big")
-            print(f"Botón {boton} presionado")
-            if ByteSerial == 0:
-                Serial.write(b'\x00') # Identificador
-            elif ByteSerial == 1:
-                Serial.write(b'\x01') # Identificador
-            elif ByteSerial == 2:
-                Serial.write(b'\x02') # Identificador
-            elif ByteSerial == 3:
-                Serial.write(b'\x03') # Identificador
-            elif ByteSerial == 4:
-                Serial.write(b'\x04') # Identificador
-            elif ByteSerial == 5:
-                Serial.write(b'\x05') # Identificador
-            elif ByteSerial == 6:
-                serial.write(b'\x06') # Identificador
+            ByteSerial = int.from_bytes(Serial.read(), "big") # Leer primer byte entrante
+            print(f"Valor byte: {ByteSerial}")
+            if ByteSerial == 0: # Solicitar lista de usuarios conectados
+                EnvioSerial(1)
+            elif ByteSerial == 1: # Recibe nuevo usuario conectado
+                if Serial.in_waiting > 0:
+                    Usuario = int.from_bytes(Serial.read(), "big")
+
+            elif ByteSerial == 2: # Recibe nivel de bateria
+                if Serial.in_waiting > 1:
+                    Usuario = int.from_bytes(Serial.read(), "big")
+
+            elif ByteSerial == 3: # Recibe pulso de boton
+                if Serial.in_waiting > 0:
+                    Usuario = int.from_bytes(Serial.read(), "big")
+
+            else:
+                print('Error en RecepcionSerial')
+
+
+def EnvioSerial(var1):
+            print(f"Enviando con identificador: {var1}")
+            if var1 == 0: # Enviar lista de usuarios conectados
+                Serial.write(b'\x00' + UsuariosConectados + b'\xF0')
+            elif var1 == 1: # Enviar puntaje jugadores
+                Serial.write(b'\x01' + Usuario + PuntajeJugador)
+            elif var1 == 2: # Iniciar nueva pregunta
+                Serial.write(b'\x02' + NumeroPregunta + PuntajePregunta)
+            elif var1 == 3: # Envio posicion del jugador
+                Serial.write(b'\x03' + Usuario + Posicion)
+            elif var1 == 4: # Envio turno actual del jugador a responder
+                Serial.write(b'\x04' + Turno)
+            elif var1 == 5: # Envio a jugador que contesto correctamente
+                Serial.write(b'\x05' + Usuario)
+            elif var1 == 6: # Envio de puestos finales
+                serial.write(b'\x06' + Usuario + PuestoFinal + PuntajeJugador)
             else:
                 print('error')
-
-
-
 
 
 
