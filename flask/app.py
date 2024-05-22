@@ -7,12 +7,44 @@ from werkzeug.utils import secure_filename
 import os
 import threading
 
+Baudios = 115200
+Puerto = 'COM11'
+
 global integer_value
 
 integer_values = []
 last_received_values = []
 
 app = Flask(__name__)
+
+def RecepcionSerial():
+    Serial = serial.Serial(Puerto, Baudios)
+
+    while True:
+        if Serial.in_waiting > 0:
+            ByteSerial = int.from_bytes(Serial.read(), "big")
+            print(f"Botón {boton} presionado")
+            if ByteSerial == 0:
+                Serial.write(b'\x00') # Identificador
+            elif ByteSerial == 1:
+                Serial.write(b'\x01') # Identificador
+            elif ByteSerial == 2:
+                Serial.write(b'\x02') # Identificador
+            elif ByteSerial == 3:
+                Serial.write(b'\x03') # Identificador
+            elif ByteSerial == 4:
+                Serial.write(b'\x04') # Identificador
+            elif ByteSerial == 5:
+                Serial.write(b'\x05') # Identificador
+            elif ByteSerial == 6:
+                serial.write(b'\x06') # Identificador
+            else:
+                print('error')
+
+
+
+
+
 
 
 conn = sqlite3.connect('database.db', check_same_thread=False)
