@@ -69,32 +69,54 @@ def EnvioSerial(var1):
 
 
 
+# Conexiones bases de datos
+conn_EstadisticasJugadores = sqlite3.connect('Estadisticas_Jugadores.db')
+conn_PreguntasRespuestas = sqlite3.connect('Preguntas_Respuestas.db')
+cursor_EstadisticasJugadores = conn_EstadisticasJugadores.cursor()
+cursor_PreguntasRespuestas = conn_PreguntasRespuestas.cursor()
 
-conn = sqlite3.connect('database.db', check_same_thread=False)
-cur = conn.cursor()
 
-cur.execute('''
-    CREATE TABLE IF NOT EXISTS data(
+cursor_EstadisticasJugadores.execute('''
+    CREATE TABLE data(
         id INTEGER PRIMARY KEY,
-        data1 TEXT,
-        data2 TEXT,
-        data3 TEXT,
-        data4 TEXT
+        Jugador INTEGER,
+        Puntaje INTEGER,
     )
 ''')
 
-# Conexión a la base de datos de preguntas
-conn_preguntas = sqlite3.connect('preguntas.db', check_same_thread=False)
-cur_preguntas = conn_preguntas.cursor()
-
-cur_preguntas.execute('''
-    CREATE TABLE IF NOT EXISTS preguntas(
+cursor_PreguntasRespuestas.execute('''
+    CREATE TABLE PreguntasRespuestas(
         id INTEGER PRIMARY KEY,
-        pregunta TEXT,
-        respuesta TEXT,
-        correcta INTEGER
+        Pregunta TEXT,
+        NumeroRespuestas INTEGER,
+        NumeroRespuestaCorrecta INTEGER,
     )
 ''')
+
+conn_EstadisticasJugadores.commit()
+conn_PreguntasRespuestas.commit()
+
+def CargarPreguntasRespuestas(Ruta):
+    with open(Ruta, 'r') as archivo:
+        for linea in archivo:
+            if linea.startswith('-'): # Es pregunta si la línea comienza con un guion
+                num_respuesta_correcta = 0 # Contiene la posicion de la respuesta correcta
+                num_respuestas = 0 # Incrementa con cada posible respuesta en la pregunta
+                Pregunta = linea[1:].strip() # Almacena pregunta sin guion
+
+            else:
+                num_respuestas += 1
+                if linea.startswith('*'): # Es la respuesta correcta si la línea comienza con un asterisco
+                    num_respuesta_correcta = num_respuestas
+
+                    conn_PreguntasRespuestas.execute(f"PRAGMA table_info PreguntasRespuestas WHERE {str("")}")
+                else: # Es una posible respuesta si no cumple con ninguna de las condiciones
+
+    conn_PreguntasRespuestas.commit()
+
+
+
+
 
 def cargar_preguntas():
     ruta_del_archivo = os.path.join(app.static_folder, 'preguntas.txt')
