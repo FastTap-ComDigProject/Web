@@ -1,30 +1,6 @@
-¿cual es la capital de Colombia?
-*Bogota
-madrid
-montevideo
-caracacas
-¿cual es la capital de Nicaragua?
-Bogota
-*la mama de villa
-montevideo
-caracacas
-¿cual es la capital de España?
-Bogota
-madrid
-montevideo
-*la mama de nicolas
-¿cual es la capital de francia?
-*la mama de pedro
-madrid
-montevideo
-caracacas
-¿cual es la capital de Peru?
-*la mama de brayan
-madrid
-montevideo
-caracacas
-¿cual es la capital de Uruguay?
-*la mama de sapo
-madrid
-montevideo
-caracacas
+¿Cuál es la capital de Australia?
+¿Cuál es la capital de Canadá?
+¿Cuál es la capital de España?
+¿Cuál es la capital de Japón?
+¿Cuál es la capital de Brasil?
+¿Cuál es la capital de India?

@@ -28,6 +28,36 @@ cur.execute('''
     )
 ''')
 
+# Conexión a la base de datos de preguntas
+conn_preguntas = sqlite3.connect('preguntas.db', check_same_thread=False)
+cur_preguntas = conn_preguntas.cursor()
+
+cur_preguntas.execute('''
+    CREATE TABLE IF NOT EXISTS preguntas(
+        id INTEGER PRIMARY KEY,
+        pregunta TEXT,
+        respuesta TEXT,
+        correcta INTEGER
+    )
+''')
+
+def cargar_preguntas():
+    ruta_del_archivo = os.path.join(app.static_folder, 'preguntas.txt')
+    with open(ruta_del_archivo, 'r') as f:
+        lineas = f.readlines()
+        for i in range(0, len(lineas), 2):
+            pregunta = lineas[i].strip()
+            respuesta = lineas[i+1].strip()
+            correcta = 1 if respuesta.startswith('*') else 0
+            if correcta:
+                respuesta = respuesta[1:]
+            cur_preguntas.execute('''
+                INSERT INTO preguntas (pregunta, respuesta, correcta) VALUES (?, ?, ?)
+            ''', (pregunta, respuesta, correcta))
+        conn_preguntas.commit()
+cargar_preguntas()
+
+
 def contar_lineas():
     ruta_del_archivo = os.path.join(app.static_folder, 'preguntas.txt')
     with open(ruta_del_archivo, 'r') as f:
@@ -48,7 +78,7 @@ def get_data_from_db():
 
 
 def send_data():
-    ser = serial.Serial('COM11', 115200)  # Reemplaza 'COM5' con el puerto correcto
+    ser = serial.Serial('COM5', 115200)  # Reemplaza 'COM5' con el puerto correcto
     global integer_values, last_received_values
     while True:
         ser.write(b'\x00')  # Envia un byte en 0
@@ -62,7 +92,7 @@ def send_data():
                 break
             
     ser.write(b'\x00') # Identificador
-    ser.write(b'\x00') # Usuarios Conectados
+    ser.write(b'\x01') # Usuarios Conectados
     while True:
         if ser.in_waiting > 0:
             incoming_byte = ser.read() # Lee el byte entrante
