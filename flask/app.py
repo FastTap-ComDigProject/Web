@@ -11,7 +11,7 @@ Baudios = 115200
 Puerto = 'COM11'
 
 UsuariosConectados = 0b00000000 # Esta variable almacenara en cada bit los usuarios conectados
-global Serial, PorcentajeBaterias, Usuario, PuntajeJugador, PuntajePregunta, NumeroPregunta, Posicion, Turno, PuestoFinal
+global Serial, PorcentajeBaterias, Usuario, PuntajeJugador, PuntajePregunta, NumeroPregunta, Posicion, Turno, PuestoFinal, PreguntaActual
 
 PorcentajeBaterias = [None] * 5
 Presionaron = [None] * 5
@@ -28,9 +28,18 @@ app = Flask(__name__)
 
 
 
-def RecepcionSerial():
+def IniciarComunicacionSerial():
+    while True:
+        try:
+            Serial = serial.Serial(Puerto, Baudios) 
+            print("Comunicación serial iniciada con éxito.")
+            return 1
+        except serial.SerialException as e:
+            time.sleep(1)
 
-    Serial = serial.Serial(Puerto, Baudios) 
+
+
+def RecepcionSerial():
 
     while True:
         if Serial.in_waiting > 0:
@@ -186,9 +195,27 @@ def ConsultarEstadisticasJugadores():
 
 
 
+@app.route('/.html')
+def home():
+
+    return render_template('Inicio.html')
 
 
 
+@app.route('/Inicio.html')
+def PaginaInicio():
+
+    return IniciarComunicacionSerial()
+
+
+
+@app.route('/ConexionUsuarios.html')
+def PaginaConexionUsuarios():
+
+
+
+@app.route('/Juego.html')
+def PaginaJuego():
 
 
 
