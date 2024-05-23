@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM11"
+Puerto = "COM9"
 
 global Serial
 global PorcentajeBaterias
@@ -51,10 +51,11 @@ def IniciarComunicacionSerial():
         try:
             Serial = serial.Serial(Puerto, Baudios)
             print("Comunicación serial iniciada con éxito.")
-            time.sleep(0.5)
+            time.sleep(2)
             Serial.write(b"\x00")  # Envia un byte en 0
             return 1
         except:
+            print("Error com serial.")
             time.sleep(1)
 
 
@@ -340,7 +341,7 @@ def IniciarComSer():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-
+    IniciarComunicacionSerial()
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
