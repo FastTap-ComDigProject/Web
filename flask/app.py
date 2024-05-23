@@ -10,13 +10,28 @@ import threading
 Baudios = 115200
 Puerto = 'COM11'
 
-UsuariosConectados = 0b00000000 # Esta variable almacenara en cada bit los usuarios conectados
-global Serial, PorcentajeBaterias, Usuario, PuntajeJugador, PuntajePregunta, NumeroPregunta, Posicion, Turno, PuestoFinal, PreguntaActual
+global Serial
+global PorcentajeBaterias
+global Usuario
+global UsuariosConectados
+global PuntajeJugador
+global PuntajePregunta
+global Presionaron
+global NumeroPregunta
+global Posicion
+global Turno
+global PuestosFinales
+global PreguntaActual
+global Tiempo_inicio_pregunta
+global Tiempo_en_presionar
 
+UsuariosConectados = 0b00000000 # Esta variable almacenara en cada bit los usuarios conectados
 PorcentajeBaterias = [None] * 5
 Presionaron = [None] * 5
 Tiempo_inicio_pregunta = 0
 Tiempo_en_presionar = [None] * 5
+PuestosFinales = [None] * 5
+
 
 
 global integer_value
@@ -62,8 +77,12 @@ def RecepcionSerial():
                     PorcentajeBaterias[Usuario] = int.from_bytes(Serial.read(), "big")
 
             elif ByteSerial == 3: # Recibe pulso de boton
+                Posicion += 1
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
+                    Presionaron[Usuario] = 1
+                    Tiempo_en_presionar[Usuario] = time.time() - Tiempo_inicio_pregunta
+                EnvioSerial(3)
 
             else:
                 print('Error en RecepcionSerial')
@@ -77,18 +96,49 @@ def EnvioSerial(var1):
             print(f"Enviando con identificador: {var1}")
             if var1 == 0: # Enviar lista de usuarios conectados
                 Serial.write(b'\x00' + UsuariosConectados)
+
             elif var1 == 1: # Enviar puntaje jugadores
-                Serial.write(b'\x01' + Usuario + PuntajeJugador)
+                for Usuario in range(5):
+                    cursor_database.execute('''SELECT Puntaje FROM Estadisticas_Jugadores 
+                                            WHERE NumeroJugador=?''', (Usuario,))
+                    var2 = cursor_database.fetchone()
+                    if var2 is not None:
+                        Serial.write(b'\x01' + bytes(Usuario) + bytes(var2))
+
             elif var1 == 2: # Iniciar nueva pregunta
-                Serial.write(b'\x02' + NumeroPregunta + PuntajePregunta)
+                Tiempo_inicio_pregunta = time.time()
+                Posicion = 0
+                cursor_database.execute('''SELECT PuntajePregunta FROM Preguntas_Respuestas 
+                                        WHERE NumeroPregunta=?''', (NumeroPregunta,))
+                PuntajePregunta = cursor_database.fetchone()
+                if PuntajePregunta is not None:
+                    Serial.write(b'\x02' + bytes(NumeroPregunta) + bytes(PuntajePregunta))
+
             elif var1 == 3: # Envio posicion del jugador
-                Serial.write(b'\x03' + Usuario + Posicion)
+                Serial.write(b'\x03' + bytes(Usuario) + bytes(Posicion))
+
             elif var1 == 4: # Envio turno actual del jugador a responder
-                Serial.write(b'\x04' + Turno)
+                Serial.write(b'\x04' + bytes(Turno))
+
             elif var1 == 5: # Envio a jugador que contesto correctamente
-                Serial.write(b'\x05' + Usuario)
+                Serial.write(b'\x05' + bytes(Usuario))
+
             elif var1 == 6: # Envio de puestos finales
-                serial.write(b'\x06' + Usuario + PuestoFinal + PuntajeJugador)
+
+                var2 = 1
+                posicion_anterior = matriz_ordenada_con_indices[0][1][1]
+                for idx, (original_idx, fila) in enumerate(matriz_ordenada_con_indices):
+                    if fila[1] != posicion_anterior:
+                        var2 = idx + 1
+                        posicion_anterior = fila[1]
+                    posiciones[original_idx] = var2
+
+
+                for Usuario in range(5):
+                    cursor_database.execute('''SELECT Puntaje FROM Estadisticas_Jugadores 
+                                            WHERE NumeroJugador=?''', (Usuario,))
+                    serial.write(b'\x06' + bytes(Usuario) + bytes(PuestosFinales[Usuario]) + bytes(cursor_database.fetchone()))
+
             else:
                 print('error')
 
@@ -192,7 +242,7 @@ def ConsultarEstadisticasJugadores():
         matriX[i][3] = Presionaron[i]
         matriX[i][4] = Tiempo_en_presionar[i]
 
-    return matriX
+    return sorted(matriX, key=lambda x: x[4]) # Ordena la matriz segun el tiempo en presionar y devuelve
 
 
 
