@@ -13,7 +13,10 @@ Puerto = 'COM11'
 UsuariosConectados = 0b00000000 # Esta variable almacenara en cada bit los usuarios conectados
 global Serial, PorcentajeBaterias, Usuario, PuntajeJugador, PuntajePregunta, NumeroPregunta, Posicion, Turno, PuestoFinal
 
-PorcentajeBaterias = [None] * 5 # Crea un vector vacio de 5 posiciones
+PorcentajeBaterias = [None] * 5
+Presionaron = [None] * 5
+Tiempo_inicio_pregunta = 0
+Tiempo_en_presionar = [None] * 5
 
 
 global integer_value
@@ -23,22 +26,29 @@ last_received_values = []
 
 app = Flask(__name__)
 
+
+
 def RecepcionSerial():
+
     Serial = serial.Serial(Puerto, Baudios) 
 
     while True:
         if Serial.in_waiting > 0:
             ByteSerial = int.from_bytes(Serial.read(), "big") # Leer primer byte entrante
             print(f"Valor byte: {ByteSerial}")
+
             if ByteSerial == 0: # Solicitar lista de usuarios conectados
                 EnvioSerial(0)
+
             elif ByteSerial == 1: # Recibe nuevo usuario conectado
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
+                    UsuariosConectados |= 1 << (Usuario - 1) # Pone en alto un bit especifico
 
             elif ByteSerial == 2: # Recibe nivel de bateria
                 if Serial.in_waiting > 1:
                     Usuario = int.from_bytes(Serial.read(), "big")
+                    PorcentajeBaterias[Usuario] = int.from_bytes(Serial.read(), "big")
 
             elif ByteSerial == 3: # Recibe pulso de boton
                 if Serial.in_waiting > 0:
@@ -47,8 +57,12 @@ def RecepcionSerial():
             else:
                 print('Error en RecepcionSerial')
 
+HiloRecepcionSerial = threading.Thread(target = RecepcionSerial) # Monitorea constantemente la comunicacion serial
+
+
 
 def EnvioSerial(var1):
+            
             print(f"Enviando con identificador: {var1}")
             if var1 == 0: # Enviar lista de usuarios conectados
                 Serial.write(b'\x00' + UsuariosConectados)
@@ -73,10 +87,8 @@ def EnvioSerial(var1):
 conn_database = sqlite3.connect('database.db')
 cursor_database = conn_database.cursor()
 
-
 cursor_database.execute('''
     CREATE TABLE Estadisticas_Jugadores(
-        id INTEGER PRIMARY KEY,
         NumeroJugador INTEGER,
         Nombre TEXT,
         Puntaje INTEGER,
@@ -99,7 +111,8 @@ cursor_database.execute('''
 cursor_database.commit()
 
 
-def CargarPreguntasRespuestas(Ruta):
+
+def CargarPreguntasRespuestas(Ruta): # 
 
     Numero_Pregunta = 0
     Puntaje_Pregunta = 0
@@ -147,6 +160,37 @@ def CargarPreguntasRespuestas(Ruta):
                 Posibles_Respuestas = ["","","",""]
 
     conn_database.commit() # Guarda todos los cambios realizados a la base de datos
+
+
+
+def ConsultarPreguntasRespuestas(var1):
+
+    cursor_database.execute("SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (var1,))
+    
+    return cursor_database.fetchone()
+
+
+
+def ConsultarEstadisticasJugadores():
+
+    matriX = [None]*5
+    for i in range(5):
+        cursor_database.execute('''SELECT NumeroJugador, Nombre, Puntaje FROM
+                                Estadisticas_Jugadores WHERE NumeroJugador=?''', (i,))
+        matriX[i] = cursor_database.fetchone()
+        matriX[i][3] = Presionaron[i]
+        matriX[i][4] = Tiempo_en_presionar[i]
+
+    return matriX
+
+
+
+
+
+
+
+
+
 
 
 
