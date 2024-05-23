@@ -71,6 +71,20 @@ def RecepcionSerial():
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
                     UsuariosConectados |= 1 << (Usuario - 1) # Pone en alto un bit especifico
+                    cursor_database.execute('''
+                    INSERT INTO Preguntas_Respuestas(
+                        NumeroPregunta,
+                        PuntajePregunta,
+                        NumeroRespuestaCorrecta,
+                        Pregunta,
+                        PosibleRespuesta1,
+                        PosibleRespuesta2,
+                        PosibleRespuesta3,
+                        PosibleRespuesta4
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (Numero_Pregunta, Puntaje_Pregunta, Numero_Respuesta_Correcta, 
+                      Pregunta, Posibles_Respuestas[0], Posibles_Respuestas[1], 
+                      Posibles_Respuestas[2], Posibles_Respuestas[3]))
 
             elif ByteSerial == 2: # Recibe nivel de bateria
                 if Serial.in_waiting > 1:
@@ -125,7 +139,8 @@ def EnvioSerial(var1):
                 Serial.write(b'\x05' + bytes(Usuario))
 
             elif var1 == 6: # Envio de puestos finales
-
+                
+                matriz_ordenada_con_indices = sorted(enumerate(matriz), key=lambda x: x[1][1], reverse=True)
                 var2 = 1
                 posicion_anterior = matriz_ordenada_con_indices[0][1][1]
                 for idx, (original_idx, fila) in enumerate(matriz_ordenada_con_indices):
@@ -225,6 +240,15 @@ def CargarPreguntasRespuestas(Ruta): #
 
 
 
+def ConsultarJugadoresConectados(var1):
+
+    vector = [None]*5
+    for i in range(5):
+        vector[4 - i] = (UsuariosConectados & 0b00011111 >> i) & 1
+    return vector
+
+
+
 def ConsultarPreguntasRespuestas(var1):
 
     cursor_database.execute("SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (var1,))
@@ -273,6 +297,12 @@ def PaginaInicio():
 @app.route('/ConexionUsuarios.html', methods=['GET', 'POST'])
 def PaginaConexionUsuarios():
     HiloRecepcionSerial.start()
+    if request.method == 'POST':
+        nombre[0] = request.form.get('input0')
+        nombre[1] = request.form.get('input1')
+        nombre[2] = request.form.get('input2')
+        nombre[3] = request.form.get('input3')
+        nombre[4] = request.form.get('input4')
 
 
 @app.route('/Juego.html', methods=['GET', 'POST'])
