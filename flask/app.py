@@ -259,7 +259,7 @@ def ConsultarJugadoresConectados():
 
 def ConsultarPreguntasRespuestas():
     PreguntaActual += 1
-    cursor_database.execute("SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (var1,))
+    cursor_database.execute("SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (PreguntaActual,))
     return cursor_database.fetchone()
 
 
@@ -325,6 +325,7 @@ def PaginaConexionUsuarios():
 
 @app.route('/Juego.html', methods=['GET', 'POST'])
 def PaginaJuego():
+    return
 
 
 
