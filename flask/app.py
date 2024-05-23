@@ -258,7 +258,7 @@ def IniciarComSer():
 @app.route('/', methods=['GET', 'POST'])
 def home():
 
-    return render_template('Index.html', IniciarComSer = IniciarComSer)
+    return render_template('index.html', IniciarComSer = IniciarComSer)
 
 
 
