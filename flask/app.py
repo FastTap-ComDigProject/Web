@@ -33,6 +33,8 @@ def IniciarComunicacionSerial():
         try:
             Serial = serial.Serial(Puerto, Baudios) 
             print("Comunicación serial iniciada con éxito.")
+            time.sleep(0.5)
+            Serial.write(b'\x00')  # Envia un byte en 0
             return 1
         except serial.SerialException as e:
             time.sleep(1)
