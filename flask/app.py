@@ -54,7 +54,7 @@ def IniciarComunicacionSerial():
             time.sleep(0.5)
             Serial.write(b"\x00")  # Envia un byte en 0
             return 1
-        except serial.SerialException as e:
+        except:
             time.sleep(1)
 
 
