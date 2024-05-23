@@ -69,71 +69,85 @@ def EnvioSerial(var1):
 
 
 
-# Conexiones bases de datos
-conn_EstadisticasJugadores = sqlite3.connect('Estadisticas_Jugadores.db')
-conn_PreguntasRespuestas = sqlite3.connect('Preguntas_Respuestas.db')
-cursor_EstadisticasJugadores = conn_EstadisticasJugadores.cursor()
-cursor_PreguntasRespuestas = conn_PreguntasRespuestas.cursor()
+# Conexion base de datos
+conn_database = sqlite3.connect('database.db')
+cursor_database = conn_database.cursor()
 
 
-cursor_EstadisticasJugadores.execute('''
-    CREATE TABLE data(
+cursor_database.execute('''
+    CREATE TABLE Estadisticas_Jugadores(
         id INTEGER PRIMARY KEY,
-        Jugador INTEGER,
+        NumeroJugador INTEGER,
         Nombre TEXT,
         Puntaje INTEGER,
     )
 ''')
 
-cursor_PreguntasRespuestas.execute('''
-    CREATE TABLE PreguntasRespuestas(
-        id INTEGER PRIMARY KEY,
-        Pregunta TEXT,
+cursor_database.execute('''
+    CREATE TABLE Preguntas_Respuestas(
+        NumeroPregunta INTEGER,
+        PuntajePregunta INTEGER,
         NumeroRespuestaCorrecta INTEGER,
+        Pregunta TEXT,
         PosibleRespuesta1 TEXT,
         PosibleRespuesta2 TEXT,
         PosibleRespuesta3 TEXT,
-        PosibleRespuesta4 TEXT,                                
+        PosibleRespuesta4 TEXT,
     )
 ''')
 
-conn_EstadisticasJugadores.commit()
-conn_PreguntasRespuestas.commit()
+cursor_database.commit()
+
 
 def CargarPreguntasRespuestas(Ruta):
-    PosiblesRespuestas = ["","","",""]
+
+    Numero_Pregunta = 0
+    Puntaje_Pregunta = 0
+    Numero_Respuesta_Correcta = 0
+    Pregunta = ""
+    Posibles_Respuestas = ["","","",""]
     contador = 0 # Incrementa con cada posible respuesta en la pregunta
+
     with open(Ruta, 'r') as archivo:
         for linea in archivo:
             if not Pregunta:
-                Pregunta = linea.strip()
-            elif linea.startswith('*'):
-                # Si la línea comienza con un asterisco, guardamos el número de respuesta
-                numero_respuesta = int(linea[1])
-                respuestas[numero_respuesta - 1] = linea[2:]
+                Numero_Pregunta += 1
+                Pregunta, Puntaje_Pregunta = linea.strip().split('-') # Divide la línea en la pregunta y el puntaje
+                Puntaje_Pregunta = int(Puntaje_Pregunta) # Convierte el puntaje a un entero
+                cursor_database.execute(f"ALTER TABLE Estadisticas_Jugadores 
+                                        ADD COLUMN Pregunta{Numero_Pregunta} INTEGER")
+                conn_database.commit()
             else:
-                # Si no es una línea de respuesta, continuamos con la siguiente
-    conn_PreguntasRespuestas.commit()
+                contador += 1
+                if linea.startswith('*'): # Respuesta correcta si la línea comienza con un asterisco
+                    Numero_Respuesta_Correcta = contador
+                    Posibles_Respuestas[contador - 1] = linea[1:].strip() # Guarda sin asterisco
+                else: # De lo contrario es otra posible respuesta
+                    Posibles_Respuestas[contador - 1] = linea.strip()
+            
+            if contador == 4: # Si termino de leer todas las respuestas procede a guardar
+                cursor_database.execute('''
+                    INSERT INTO Preguntas_Respuestas(
+                        NumeroPregunta,
+                        PuntajePregunta,
+                        NumeroRespuestaCorrecta,
+                        Pregunta,
+                        PosibleRespuesta1,
+                        PosibleRespuesta2,
+                        PosibleRespuesta3,
+                        PosibleRespuesta4
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (Numero_Pregunta, Puntaje_Pregunta, Numero_Respuesta_Correcta, 
+                      Pregunta, Posibles_Respuestas[0], Posibles_Respuestas[1], 
+                      Posibles_Respuestas[2], Posibles_Respuestas[3]))
 
+                Puntaje_Pregunta = 0
+                Numero_Respuesta_Correcta
+                Pregunta = ""
+                Posibles_Respuestas = ["","","",""]
 
+    conn_database.commit() # Guarda todos los cambios realizados a la base de datos
 
-
-
-def cargar_preguntas():
-    ruta_del_archivo = os.path.join(app.static_folder, 'preguntas.txt')
-    with open(ruta_del_archivo, 'r') as f:
-        lineas = f.readlines()
-        for i in range(0, len(lineas), 2):
-            pregunta = lineas[i].strip()
-            respuesta = lineas[i+1].strip()
-            correcta = 1 if respuesta.startswith('*') else 0
-            if correcta:
-                respuesta = respuesta[1:]
-            cur_preguntas.execute('''
-                INSERT INTO preguntas (pregunta, respuesta, correcta) VALUES (?, ?, ?)
-            ''', (pregunta, respuesta, correcta))
-        conn_preguntas.commit()
-cargar_preguntas()
 
 
 def contar_lineas():
