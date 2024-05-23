@@ -116,9 +116,11 @@ def EnvioSerial(var1):
                 for Usuario in range(5):
                     cursor_database.execute('''SELECT Puntaje FROM Estadisticas_Jugadores 
                                             WHERE NumeroJugador=?''', (Usuario,))
-                    var2 = cursor_database.fetchone()
-                    if var2 is not None:
-                        Serial.write(b'\x01' + bytes(Usuario) + bytes(var2))
+                    Puntaje = cursor_database.fetchone()
+                    if Puntaje is not None:
+                        usuario_bytes = (Usuario).to_bytes(1, 'big')
+                        puntaje_bytes = (Puntaje).to_bytes(1, 'big')
+                        Serial.write(b'\x01' + usuario_bytes + puntaje_bytes)
 
             elif var1 == 2: # Iniciar nueva pregunta
                 Tiempo_inicio_pregunta = time.time()
@@ -127,33 +129,50 @@ def EnvioSerial(var1):
                                         WHERE NumeroPregunta=?''', (NumeroPregunta,))
                 PuntajePregunta = cursor_database.fetchone()
                 if PuntajePregunta is not None:
-                    Serial.write(b'\x02' + bytes(NumeroPregunta) + bytes(PuntajePregunta))
+                    numero_pregunta_bytes = (NumeroPregunta).to_bytes(1, 'big')
+                    puntaje_pregunta_bytes = (PuntajePregunta).to_bytes(1, 'big')
+                    Serial.write(b'\x02' + numero_pregunta_bytes + puntaje_pregunta_bytes)
 
             elif var1 == 3: # Envio posicion del jugador
-                Serial.write(b'\x03' + bytes(Usuario) + bytes(Posicion))
+                usuario_bytes = (Usuario).to_bytes(1, 'big')
+                posicion_bytes = (Posicion).to_bytes(1, 'big')
+                Serial.write(b'\x03' + usuario_bytes + posicion_bytes)
 
             elif var1 == 4: # Envio turno actual del jugador a responder
-                Serial.write(b'\x04' + bytes(Turno))
+                turno_bytes = (Turno).to_bytes(1, 'big')
+                Serial.write(b'\x04' + turno_bytes)
 
             elif var1 == 5: # Envio a jugador que contesto correctamente
-                Serial.write(b'\x05' + bytes(Usuario))
+                usuario_bytes = (Usuario).to_bytes(1, 'big')
+                Serial.write(b'\x05' + usuario_bytes)
 
             elif var1 == 6: # Envio de puestos finales
-                
-                matriz_ordenada_con_indices = sorted(enumerate(matriz), key=lambda x: x[1][1], reverse=True)
-                var2 = 1
-                posicion_anterior = matriz_ordenada_con_indices[0][1][1]
-                for idx, (original_idx, fila) in enumerate(matriz_ordenada_con_indices):
-                    if fila[1] != posicion_anterior:
-                        var2 = idx + 1
-                        posicion_anterior = fila[1]
-                    posiciones[original_idx] = var2
+                matriz = [None] * 5
+                for i in range(5):
+                    cursor_database.execute('''SELECT Puntaje FROM Estadisticas_Jugadores 
+                                                WHERE NumeroJugador=?''', (Usuario,))
+                    matriz[i] = list(cursor_database.fetchone())
 
+                matriz.sort(key=lambda x: x[0], reverse=True)
+
+                posicion = 1
+                ultimo_valor = matriz[0][0]
+
+                for i in range(len(matriz)):
+                    # Si el valor actual es diferente al último valor visto, incrementamos la posición
+                    if matriz[i][0] != ultimo_valor:
+                        posicion += 1
+                        ultimo_valor = matriz[i][0]
+                    # Agregamos la posición a la fila actual
+                    matriz[i].append(posicion)
 
                 for Usuario in range(5):
-                    cursor_database.execute('''SELECT Puntaje FROM Estadisticas_Jugadores 
-                                            WHERE NumeroJugador=?''', (Usuario,))
-                    serial.write(b'\x06' + bytes(Usuario) + bytes(PuestosFinales[Usuario]) + bytes(cursor_database.fetchone()))
+                    usuario_bytes = (Usuario).to_bytes(1, 'big')
+                    posicion_final_bytes = (matriz[Usuario][1]).to_bytes(1, 'big')
+                    puntaje_bytes = (matriz[Usuario][0]).to_bytes(1, 'big')
+
+                    # Enviamos los datos
+                    serial.write(b'\x06' + usuario_bytes + posicion_final_bytes + puntaje_bytes)
 
             else:
                 print('error')
