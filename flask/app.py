@@ -44,6 +44,7 @@ app = Flask(__name__)
 
 
 def IniciarComunicacionSerial():
+    
     while True:
         try:
             Serial = serial.Serial(Puerto, Baudios) 
@@ -227,7 +228,6 @@ def CargarPreguntasRespuestas(Ruta): #
 def ConsultarPreguntasRespuestas(var1):
 
     cursor_database.execute("SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (var1,))
-    
     return cursor_database.fetchone()
 
 
@@ -241,32 +241,31 @@ def ConsultarEstadisticasJugadores():
         matriX[i] = cursor_database.fetchone()
         matriX[i][3] = Presionaron[i]
         matriX[i][4] = Tiempo_en_presionar[i]
-
     return sorted(matriX, key=lambda x: x[4]) # Ordena la matriz segun el tiempo en presionar y devuelve
 
 
 
 
-@app.route('/.html')
+@app.route('/', methods=['GET', 'POST'])
 def home():
 
     return render_template('Inicio.html')
 
 
 
-@app.route('/Inicio.html')
+@app.route('/Inicio.html', methods=['GET', 'POST'])
 def PaginaInicio():
 
     return IniciarComunicacionSerial()
 
 
 
-@app.route('/ConexionUsuarios.html')
+@app.route('/ConexionUsuarios.html', methods=['GET', 'POST'])
 def PaginaConexionUsuarios():
+    HiloRecepcionSerial.start()
 
 
-
-@app.route('/Juego.html')
+@app.route('/Juego.html', methods=['GET', 'POST'])
 def PaginaJuego():
 
 
