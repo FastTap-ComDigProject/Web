@@ -71,20 +71,9 @@ def RecepcionSerial():
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
                     UsuariosConectados |= 1 << (Usuario - 1) # Pone en alto un bit especifico
-                    cursor_database.execute('''
-                    INSERT INTO Preguntas_Respuestas(
-                        NumeroPregunta,
-                        PuntajePregunta,
-                        NumeroRespuestaCorrecta,
-                        Pregunta,
-                        PosibleRespuesta1,
-                        PosibleRespuesta2,
-                        PosibleRespuesta3,
-                        PosibleRespuesta4
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (Numero_Pregunta, Puntaje_Pregunta, Numero_Respuesta_Correcta, 
-                      Pregunta, Posibles_Respuestas[0], Posibles_Respuestas[1], 
-                      Posibles_Respuestas[2], Posibles_Respuestas[3]))
+                    cursor_database.execute('''INSERT INTO Estadisticas_Jugadores(
+                                            NumeroJugador) VALUES (?)''', (Usuario,))
+                    cursor_database.commit()
 
             elif ByteSerial == 2: # Recibe nivel de bateria
                 if Serial.in_waiting > 1:
@@ -259,7 +248,7 @@ def CargarPreguntasRespuestas(Ruta): #
 
 
 
-def ConsultarJugadoresConectados(var1):
+def ConsultarJugadoresConectados():
 
     vector = [None]*5
     for i in range(5):
@@ -268,8 +257,8 @@ def ConsultarJugadoresConectados(var1):
 
 
 
-def ConsultarPreguntasRespuestas(var1):
-
+def ConsultarPreguntasRespuestas():
+    PreguntaActual += 1
     cursor_database.execute("SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (var1,))
     return cursor_database.fetchone()
 
@@ -308,6 +297,7 @@ def home():
 @app.route('/Inicio.html', methods=['GET', 'POST'])
 def PaginaInicio():
     if request.method == 'POST':
+        return render_template('ConexionUsuarios.html', IniciarComSer = IniciarComSer)
 
 
 
@@ -317,15 +307,36 @@ def PaginaInicio():
 def PaginaConexionUsuarios():
     HiloRecepcionSerial.start()
     if request.method == 'POST':
+        nombre = [None] * 5
         nombre[0] = request.form.get('input0')
         nombre[1] = request.form.get('input1')
         nombre[2] = request.form.get('input2')
         nombre[3] = request.form.get('input3')
         nombre[4] = request.form.get('input4')
+        for Usuario in range(5):
+            cursor_database.execute('''SELECT NumeroJugador FROM Estadisticas_Jugadores 
+                                    WHERE NumeroJugador=?''', (Usuario,))
+            if cursor_database.fetchone() is not None:
+                cursor_database.execute('''UPDATE Estadisticas_Jugadores SET Nombre = ? 
+                                        WHERE NumeroJugador = ?''', (nombre[Usuario], Usuario))
+        conn_database.commit()
+    
 
 
 @app.route('/Juego.html', methods=['GET', 'POST'])
 def PaginaJuego():
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
