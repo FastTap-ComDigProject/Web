@@ -246,17 +246,27 @@ def ConsultarEstadisticasJugadores():
 
 
 
+@app.route('/IniciarComSer')
+def IniciarComSer():
+
+    Conectado = 0
+    Conectado = IniciarComunicacionSerial()
+    return jsonify({'Conectado': Conectado})
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
 
-    return render_template('Inicio.html')
+    return render_template('Index.html', IniciarComSer = IniciarComSer)
 
 
 
 @app.route('/Inicio.html', methods=['GET', 'POST'])
 def PaginaInicio():
+    if request.method == 'POST':
 
-    return IniciarComunicacionSerial()
+
 
 
 
