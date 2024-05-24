@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -345,11 +345,11 @@ def IniciarComSer():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    if request.method == 'POST':
-        dato = request.form.get('dato')
-        if dato == 'EMPEZAR':
+    if request.method == "POST":
+        dato = request.form.get("dato")
+        if dato == "EMPEZAR":
             print("se oprimio empezar")
-            return redirect(url_for('PaginaConexionUsuarios'))
+            return redirect(url_for("PaginaConexionUsuarios"))
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
