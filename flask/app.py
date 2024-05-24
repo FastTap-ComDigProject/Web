@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -350,6 +350,7 @@ def IniciarComSer():
     global Conectado
     if Conectado == 0:
         Conectado = IniciarComunicacionSerial()
+
     return jsonify({"Conectado": Conectado})
 
 
