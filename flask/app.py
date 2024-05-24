@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -79,15 +79,17 @@ def RecepcionSerial():
             elif ByteSerial == 1:  # Recibe nuevo usuario conectado
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
+                    print(f"Recibe nuevo usuario conectado : {Usuario}")
                     UsuariosConectados |= 1 << (
-                        Usuario - 1
+                        Usuario
                     )  # Pone en alto un bit especifico
+                    print(f"Usuarios conectados: {UsuariosConectados}")
                     cursor_database.execute(
                         """INSERT INTO Estadisticas_Jugadores(
                                             NumeroJugador) VALUES (?)""",
                         (Usuario,),
                     )
-                    cursor_database.commit()
+                    conn_database.commit()
 
             elif ByteSerial == 2:  # Recibe nivel de bateria
                 if Serial.in_waiting > 1:
@@ -120,7 +122,8 @@ def EnvioSerial(var1):
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
-        Serial.write(b"\x00" + UsuariosConectados)
+        usuarios_conectados_bytes = (UsuariosConectados).to_bytes(1, "big")
+        Serial.write(b"\x00" + usuarios_conectados_bytes)
 
     elif var1 == 1:  # Enviar puntaje jugadores
         for Usuario in range(5):
@@ -198,7 +201,7 @@ def EnvioSerial(var1):
 
 
 # Conexion base de datos
-conn_database = sqlite3.connect("database.db")
+conn_database = sqlite3.connect("database.db", check_same_thread=False)
 cursor_database = conn_database.cursor()
 
 # Eliminar la tabla Estadisticas_Jugadores
@@ -309,10 +312,11 @@ def CargarPreguntasRespuestas(Ruta):  #
 
 
 def ConsultarJugadoresConectados():
-
+    global UsuariosConectados
     vector = [None] * 5
     for i in range(5):
-        vector[4 - i] = (UsuariosConectados & 0b00011111 >> i) & 1
+        vector[i] = (UsuariosConectados >> i) & 1
+    print(f"Vector: {vector}")
     return vector
 
 
@@ -360,6 +364,12 @@ def home():
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
+@app.route("/VectConUsu")
+def VectConUsu():
+
+    return jsonify({"JugadoresConectados": ConsultarJugadoresConectados()})
+
+
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])
 def PaginaConexionUsuarios():
     HiloRecepcionSerial.start()
@@ -383,6 +393,7 @@ def PaginaConexionUsuarios():
                     (nombre[Usuario], Usuario),
                 )
         conn_database.commit()
+    return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
 
 
 # @app.route("/Juego.html", methods=["GET", "POST"])

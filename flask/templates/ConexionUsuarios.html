@@ -86,15 +86,9 @@
 
             }
             function getData() {
-                $.get('/data', function (response) {
-                    var data = response.data;
-                    console.log(data)
-                    if (data[0] === 1) {
-                        usuario = data[1];
-                        console.log("El ID del usuario es: " + usuario);
-                        a = usuario;
-                        toggleStatus(a);
-                    }
+                $.get('/VectConUsu', function (response) {
+                    var JugadoresConectados = response.JugadoresConectados;
+                    console.log(JugadoresConectados)
                 });
             }
 
