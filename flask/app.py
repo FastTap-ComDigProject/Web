@@ -345,7 +345,7 @@ def home():
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
-@app.route("/Inicio.html", methods=["GET", "POST"])
+@app.route("/index.html", methods=["GET", "POST"])
 def PaginaInicio():
     if request.method == "POST":
         return render_template("ConexionUsuarios.html", IniciarComSer=IniciarComSer)
