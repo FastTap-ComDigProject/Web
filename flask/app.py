@@ -105,7 +105,7 @@ def RecepcionSerial():
                 EnvioSerial(3)
 
             else:
-                print("Error en RecepcionSerial")
+                print("Error en RecepcionSeriaal")
 
 
 HiloRecepcionSerial = threading.Thread(
