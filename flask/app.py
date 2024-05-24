@@ -48,6 +48,7 @@ app = Flask(__name__)
 
 
 def IniciarComunicacionSerial():
+    global Serial
     try:
         Serial = serial.Serial(Puerto, Baudios)
         print("Comunicación serial iniciada con éxito.")
@@ -60,6 +61,11 @@ def IniciarComunicacionSerial():
 
 
 def RecepcionSerial():
+    global Serial
+    global UsuariosConectados
+    global Presionaron
+    global Tiempo_en_presionar
+    global Posicion
     while True:
         if Serial.in_waiting > 0:
             ByteSerial = int.from_bytes(
@@ -106,6 +112,11 @@ HiloRecepcionSerial = threading.Thread(
 
 
 def EnvioSerial(var1):
+    global Serial
+    global UsuariosConectados
+    global Tiempo_inicio_pregunta
+    global NumeroPregunta
+    global Turno
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
@@ -341,11 +352,11 @@ def IniciarComSer():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    if request.method == 'POST':
-        dato = request.form.get('dato')
-        if dato == 'EMPEZAR':
+    if request.method == "POST":
+        dato = request.form.get("dato")
+        if dato == "EMPEZAR":
             print("se oprimio empezar")
-            return redirect(url_for('PaginaConexionUsuarios'))
+            return redirect(url_for("PaginaConexionUsuarios"))
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
