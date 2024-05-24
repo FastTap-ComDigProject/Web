@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM9"
+Puerto = "COM5"
 
 global Serial
 global PorcentajeBaterias
@@ -60,7 +60,6 @@ def IniciarComunicacionSerial():
 
 
 def RecepcionSerial():
-
     while True:
         if Serial.in_waiting > 0:
             ByteSerial = int.from_bytes(
@@ -334,7 +333,6 @@ def ConsultarEstadisticasJugadores():
 @app.route("/IniciarComSer")
 def IniciarComSer():
     global Conectado
-
     if Conectado == 0:
         Conectado = IniciarComunicacionSerial()
 
@@ -343,13 +341,12 @@ def IniciarComSer():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    if request.method == 'POST':
+        dato = request.form.get('dato')
+        if dato == 'EMPEZAR':
+            print("se oprimio empezar")
+            return redirect(url_for('PaginaConexionUsuarios'))
     return render_template("index.html", IniciarComSer=IniciarComSer)
-
-
-@app.route("/index.html", methods=["GET", "POST"])
-def PaginaInicio():
-    if request.method == "POST":
-        return render_template("ConexionUsuarios.html", IniciarComSer=IniciarComSer)
 
 
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])

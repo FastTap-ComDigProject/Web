@@ -30,7 +30,14 @@
             $.get('/IniciarComSer', function (response) {
                 var Conectado = response.Conectado;
                 console.log(Conectado);
-
+                var boton = document.querySelector('.boton-estilo');
+                if (Conectado == 0) {
+                    boton.style.backgroundColor = 'gray';
+                    boton.disabled = true;
+                } else {
+                    boton.style.backgroundColor = '#9c27b0';
+                    boton.disabled = false;
+                }
             });
         }
 
@@ -39,18 +46,23 @@
     </script>
 
     <style>
+        .boton-estilo:disabled {
+            cursor: not-allowed;
+        }
+
         .boton-estilo {
-        background-color: #9c27b0;
-        border: none;
-        color: white;
-        padding: 15px 32px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
-    }
+            background-color: #9c27b0;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
         @font-face {
             font-family: 'Retro Gaming';
             src: url('./retrogaming.ttf') format('truetype');
