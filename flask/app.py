@@ -374,11 +374,14 @@ def VectConUsu():
 def PaginaConexionUsuarios():
     HiloRecepcionSerial.start()
     if request.method == "POST":
+        data = request.get_json()
+        print(data)
         nombre = [None] * 5
         nombre[1] = request.form.get("input1")
         nombre[2] = request.form.get("input2")
         nombre[3] = request.form.get("input3")
         nombre[4] = request.form.get("input4")
+        return jsonify({'message': 'Data received'}), 200
         for Usuario in range(5):
             cursor_database.execute(
                 """SELECT NumeroJugador FROM Estadisticas_Jugadores 
@@ -397,14 +400,14 @@ def PaginaConexionUsuarios():
             if archivo.filename != '':
                 filename = secure_filename('preguntas.txt')
                 archivo.save(os.path.join(app.root_path, 'static', filename))
+                return redirect(url_for('Juego'))
         else:
             return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
     return render_template("ConexionUsuarios.html")
 
-
-# @app.route("/Juego.html", methods=["GET", "POST"])
-# def PaginaJuego():
-
+@app.route("/Juego.html", methods=["GET", "POST"])
+def Juego():
+    return render_template('Juego.html')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000)

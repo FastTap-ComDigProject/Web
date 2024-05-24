@@ -38,7 +38,7 @@
                 </div>
             </div>
         </div>
-        <form action="/ConexionUsarios.html" method="post" enctype="multipart/form-data">
+        <form action="/ConexionUsuarios.html" method="post" enctype="multipart/form-data">
             <label for="miArchivo">Seleccione las preguntas:</label>
             <input type="file" id="miArchivo" name="miArchivo" accept=".txt">
             <br>
@@ -114,8 +114,15 @@
                     'input4': input4
                 };
                 // Envia los datos al servidor con una solicitud POST
-                $.post('/ConexionUsuarios.html', data, function (response) {
-                    console.log(response);
+                $.ajax({
+                    url: '/ConexionUsuarios.html',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log(response);
+                    }
                 });
             }
 
