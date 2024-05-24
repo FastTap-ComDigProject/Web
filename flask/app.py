@@ -26,6 +26,7 @@ global PuestosFinales
 global PreguntaActual
 global Tiempo_inicio_pregunta
 global Tiempo_en_presionar
+global Conectado
 
 UsuariosConectados = (
     0b00000000  # Esta variable almacenara en cada bit los usuarios conectados
@@ -35,6 +36,7 @@ Presionaron = [None] * 5
 Tiempo_inicio_pregunta = 0
 Tiempo_en_presionar = [None] * 5
 PuestosFinales = [None] * 5
+Conectado = 0
 
 
 global integer_value
@@ -333,15 +335,16 @@ def ConsultarEstadisticasJugadores():
 
 @app.route("/IniciarComSer")
 def IniciarComSer():
+    global Conectado
 
-    Conectado = 0
-    Conectado = IniciarComunicacionSerial()
+    if Conectado == 0:
+        Conectado = IniciarComunicacionSerial()
+
     return jsonify({"Conectado": Conectado})
 
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    IniciarComunicacionSerial()
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 

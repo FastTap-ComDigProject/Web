@@ -27,9 +27,9 @@
             document.querySelector('.content').classList.remove('hidden');
         }, 500);
         function getData() {
-            $.get('/data', function (response) {
-                var data = response.data;
-                console.log(data);
+            $.get('/IniciarComSer', function (response) {
+                var Conectado = response.Conectado;
+                console.log(Conectado);
 
             });
         }
