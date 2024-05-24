@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM7"
+Puerto = "COM5"
 
 global Serial
 global PorcentajeBaterias
@@ -119,6 +119,7 @@ def EnvioSerial(var1):
     global Tiempo_inicio_pregunta
     global NumeroPregunta
     global Turno
+    global posicion
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
@@ -366,7 +367,6 @@ def home():
 
 @app.route("/VectConUsu")
 def VectConUsu():
-
     return jsonify({"JugadoresConectados": ConsultarJugadoresConectados()})
 
 
@@ -375,7 +375,6 @@ def PaginaConexionUsuarios():
     HiloRecepcionSerial.start()
     if request.method == "POST":
         nombre = [None] * 5
-        nombre[0] = request.form.get("input0")
         nombre[1] = request.form.get("input1")
         nombre[2] = request.form.get("input2")
         nombre[3] = request.form.get("input3")
@@ -393,7 +392,14 @@ def PaginaConexionUsuarios():
                     (nombre[Usuario], Usuario),
                 )
         conn_database.commit()
-    return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
+        if 'miArchivo' in request.files:
+            archivo = request.files['miArchivo']
+            if archivo.filename != '':
+                filename = secure_filename('preguntas.txt')
+                archivo.save(os.path.join(app.root_path, 'static', filename))
+        else:
+            return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
+    return render_template("ConexionUsuarios.html")
 
 
 # @app.route("/Juego.html", methods=["GET", "POST"])

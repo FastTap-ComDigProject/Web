@@ -19,18 +19,22 @@
                 <button class="registro-btn" id="boton1">INACTIVO</button>
                 <div id="input1" class="input-area hidden">
                     <input type="text" placeholder="Ingresa tu nombre">
+                    <br>
                 </div>
                 <button class="registro-btn" id="boton2">INACTIVO</button>
                 <div id="input2" class="input-area hidden">
                     <input type="text" placeholder="Ingresa tu nombre">
+                    <br>
                 </div>
                 <button class="registro-btn" id="boton3">INACTIVO</button>
                 <div id="input3" class="input-area hidden">
                     <input type="text" placeholder="Ingresa tu nombre">
+                    <br>
                 </div>
                 <button class="registro-btn" id="boton4">INACTIVO</button>
                 <div id="input4" class="input-area hidden">
                     <input type="text" placeholder="Ingresa tu nombre">
+                    <br>
                 </div>
             </div>
         </div>
@@ -109,9 +113,8 @@
                     'input3': input3,
                     'input4': input4
                 };
-
                 // Envia los datos al servidor con una solicitud POST
-                $.post('/Pagina2.html', data, function (response) {
+                $.post('/ConexionUsuarios.html', data, function (response) {
                     console.log(response);
                 });
             }
