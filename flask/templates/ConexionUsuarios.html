@@ -114,15 +114,8 @@
                     'input4': input4
                 };
                 // Envia los datos al servidor con una solicitud POST
-                $.ajax({
-                    url: '/ConexionUsuarios.html',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    dataType: 'json',
-                    success: function (response) {
-                        console.log(response);
-                    }
+                $.post('/ConexionUsuarios.', data, function (response) {
+                    console.log(response);
                 });
             }
 

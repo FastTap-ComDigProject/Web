@@ -361,6 +361,7 @@ def home():
         dato = request.form.get("dato")
         if dato == "EMPEZAR":
             print("se oprimio empezar")
+            HiloRecepcionSerial.start()
             return redirect(url_for("PaginaConexionUsuarios"))
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
@@ -372,16 +373,13 @@ def VectConUsu():
 
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])
 def PaginaConexionUsuarios():
-    HiloRecepcionSerial.start()
+    
     if request.method == "POST":
-        data = request.get_json()
-        print(data)
         nombre = [None] * 5
         nombre[1] = request.form.get("input1")
         nombre[2] = request.form.get("input2")
         nombre[3] = request.form.get("input3")
         nombre[4] = request.form.get("input4")
-        return jsonify({'message': 'Data received'}), 200
         for Usuario in range(5):
             cursor_database.execute(
                 """SELECT NumeroJugador FROM Estadisticas_Jugadores 
