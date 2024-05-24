@@ -34,17 +34,18 @@
                 </div>
             </div>
         </div>
-        <form action="/ConexionUsarios.html" method="post" enctype="multipart/form-data">
+        <form action="/Pagina2.html" method="post" enctype="multipart/form-data">
             <label for="miArchivo">Seleccione las preguntas:</label>
             <input type="file" id="miArchivo" name="miArchivo" accept=".txt">
             <br>
             <input id="send-btn" type="submit" value="Siguiente" name="submit">
         </form>
         <script>
+            usuario = 0;
             function toggleStatus(num) {
-                if (num[0] === 1) {  // Solo cambia el estado si el ID del usuario es 1
-                    var inputArea = document.getElementById('input' + 1);
-                    var button = document.querySelector('.registro-btn:nth-child(' + (1 * 2 - 1) + ')');
+                if (num === 1) {  // Solo cambia el estado si el ID del usuario es 1
+                    var inputArea = document.getElementById('input' + num);
+                    var button = document.querySelector('.registro-btn:nth-child(' + (num * 2 - 1) + ')');
                     if (inputArea.classList.contains('hidden')) {
                         inputArea.classList.remove('hidden');
                         button.classList.remove('inactive');
@@ -52,9 +53,9 @@
                         button.textContent = "ACTIVO";
                     }
                 }
-                if (num[1] === 1) {  // Solo cambia el estado si el ID del usuario es 1
-                    var inputArea = document.getElementById('input' + 2);
-                    var button = document.querySelector('.registro-btn:nth-child(' + (2 * 2 - 1) + ')');
+                if (num === 2) {  // Solo cambia el estado si el ID del usuario es 1
+                    var inputArea = document.getElementById('input' + num);
+                    var button = document.querySelector('.registro-btn:nth-child(' + (num * 2 - 1) + ')');
                     if (inputArea.classList.contains('hidden')) {
                         inputArea.classList.remove('hidden');
                         button.classList.remove('inactive');
@@ -62,9 +63,9 @@
                         button.textContent = "ACTIVO";
                     }
                 }
-                if (num[2] === 1) {  // Solo cambia el estado si el ID del usuario es 1
-                    var inputArea = document.getElementById('input' + 3);
-                    var button = document.querySelector('.registro-btn:nth-child(' + (3 * 2 - 1) + ')');
+                if (num === 3) {  // Solo cambia el estado si el ID del usuario es 1
+                    var inputArea = document.getElementById('input' + num);
+                    var button = document.querySelector('.registro-btn:nth-child(' + (num * 2 - 1) + ')');
                     if (inputArea.classList.contains('hidden')) {
                         inputArea.classList.remove('hidden');
                         button.classList.remove('inactive');
@@ -72,9 +73,9 @@
                         button.textContent = "ACTIVO";
                     }
                 }
-                if (num[3] === 1) {  // Solo cambia el estado si el ID del usuario es 1
-                    var inputArea = document.getElementById('input' + 4);
-                    var button = document.querySelector('.registro-btn:nth-child(' + (4 * 2 - 1) + ')');
+                if (num === 4) {  // Solo cambia el estado si el ID del usuario es 1
+                    var inputArea = document.getElementById('input' + num);
+                    var button = document.querySelector('.registro-btn:nth-child(' + (num * 2 - 1) + ')');
                     if (inputArea.classList.contains('hidden')) {
                         inputArea.classList.remove('hidden');
                         button.classList.remove('inactive');
@@ -88,7 +89,6 @@
                 $.get('/VectConUsu', function (response) {
                     var JugadoresConectados = response.JugadoresConectados;
                     console.log(JugadoresConectados)
-                    toggleStatus(JugadoresConectados)
                 });
             }
 
