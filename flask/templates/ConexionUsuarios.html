@@ -107,15 +107,22 @@
                 var input4 = document.querySelector('#input4 input').value;
 
                 // Crea un objeto con los datos
-                var data = {
-                    'input1': input1,
-                    'input2': input2,
-                    'input3': input3,
-                    'input4': input4
-                };
-                // Envia los datos al servidor con una solicitud POST
-                $.post('/ConexionUsuarios.', data, function (response) {
-                    console.log(response);
+                var formData = new FormData();
+                formData.append('input1', input1);
+                formData.append('input2', input2);
+                formData.append('input3', input3);
+                formData.append('input4', input4);
+                formData.append('miArchivo', document.getElementById('miArchivo').files[0]);
+
+                $.ajax({
+                    url: '/ConexionUsuarios.html',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        console.log(response);
+                    }
                 });
             }
 
