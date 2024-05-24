@@ -48,7 +48,6 @@ app = Flask(__name__)
 
 
 def IniciarComunicacionSerial():
-    global Serial
     try:
         Serial = serial.Serial(Puerto, Baudios)
         print("Comunicación serial iniciada con éxito.")
@@ -61,7 +60,6 @@ def IniciarComunicacionSerial():
 
 
 def RecepcionSerial():
-    global Serial
     while True:
         if Serial.in_waiting > 0:
             ByteSerial = int.from_bytes(
@@ -71,7 +69,7 @@ def RecepcionSerial():
 
             if ByteSerial == 0:  # Solicitar lista de usuarios conectados
                 EnvioSerial(0)
-                
+
             elif ByteSerial == 1:  # Recibe nuevo usuario conectado
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
@@ -113,12 +111,8 @@ def EnvioSerial(var1):
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
-<<<<<<< Updated upstream
         usuarios_conectados_bytes = (UsuariosConectados).to_bytes(1, "big")
         Serial.write(b"\x00" + usuarios_conectados_bytes)
-=======
-        Serial.write(b"\x00" + bytes(UsuariosConectados))
->>>>>>> Stashed changes
 
     elif var1 == 1:  # Enviar puntaje jugadores
         for Usuario in range(5):
@@ -351,11 +345,11 @@ def IniciarComSer():
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    if request.method == 'POST':
-        dato = request.form.get('dato')
-        if dato == 'EMPEZAR':
+    if request.method == "POST":
+        dato = request.form.get("dato")
+        if dato == "EMPEZAR":
             print("se oprimio empezar")
-            return redirect(url_for('PaginaConexionUsuarios'))
+            return redirect(url_for("PaginaConexionUsuarios"))
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
