@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -360,6 +360,7 @@ def home():
     if request.method == "POST":
         dato = request.form.get("dato")
         if dato == "EMPEZAR":
+            HiloRecepcionSerial.start()
             print("se oprimio empezar")
             return redirect(url_for("PaginaConexionUsuarios"))
     return render_template("index.html", IniciarComSer=IniciarComSer)
@@ -372,7 +373,6 @@ def VectConUsu():
 
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])
 def PaginaConexionUsuarios():
-    HiloRecepcionSerial.start()
     if request.method == "POST":
         data = request.get_json()
         print(data)
@@ -381,7 +381,7 @@ def PaginaConexionUsuarios():
         nombre[2] = request.form.get("input2")
         nombre[3] = request.form.get("input3")
         nombre[4] = request.form.get("input4")
-        return jsonify({'message': 'Data received'}), 200
+        return jsonify({"message": "Data received"})
         for Usuario in range(5):
             cursor_database.execute(
                 """SELECT NumeroJugador FROM Estadisticas_Jugadores 
@@ -395,19 +395,21 @@ def PaginaConexionUsuarios():
                     (nombre[Usuario], Usuario),
                 )
         conn_database.commit()
-        if 'miArchivo' in request.files:
-            archivo = request.files['miArchivo']
-            if archivo.filename != '':
-                filename = secure_filename('preguntas.txt')
-                archivo.save(os.path.join(app.root_path, 'static', filename))
-                return redirect(url_for('Juego'))
+        if "miArchivo" in request.files:
+            archivo = request.files["miArchivo"]
+            if archivo.filename != "":
+                filename = secure_filename("preguntas.txt")
+                archivo.save(os.path.join(app.root_path, "static", filename))
+                return redirect(url_for("Juego"))
         else:
             return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
     return render_template("ConexionUsuarios.html")
 
+
 @app.route("/Juego.html", methods=["GET", "POST"])
 def Juego():
-    return render_template('Juego.html')
+    return render_template("Juego.html")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000)
