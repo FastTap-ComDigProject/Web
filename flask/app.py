@@ -48,17 +48,15 @@ app = Flask(__name__)
 
 
 def IniciarComunicacionSerial():
-
-    while True:
-        try:
-            Serial = serial.Serial(Puerto, Baudios)
-            print("Comunicación serial iniciada con éxito.")
-            time.sleep(2)
-            Serial.write(b"\x00")  # Envia un byte en 0
-            return 1
-        except:
-            print("Error com serial.")
-            time.sleep(1)
+    try:
+        Serial = serial.Serial(Puerto, Baudios)
+        print("Comunicación serial iniciada con éxito.")
+        time.sleep(2)
+        Serial.write(b"\x00")  # Envia un byte en 0
+        return 1
+    except:
+        print("Error com serial.")
+        return 0
 
 
 def RecepcionSerial():
