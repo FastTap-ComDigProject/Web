@@ -124,6 +124,14 @@
                         console.log(response);
                     }
                 });
+                $.ajax({
+                    url: '/ConexionUsuarios.html',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log(response);
+                    }})
             }
 
             // Llama a la función sendData cuando se hace clic en un botón
