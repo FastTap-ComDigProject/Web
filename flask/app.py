@@ -48,6 +48,7 @@ app = Flask(__name__)
 
 
 def IniciarComunicacionSerial():
+    global Serial
     try:
         Serial = serial.Serial(Puerto, Baudios)
         print("Comunicación serial iniciada con éxito.")
@@ -60,6 +61,11 @@ def IniciarComunicacionSerial():
 
 
 def RecepcionSerial():
+    global Serial
+    global UsuariosConectados
+    global Presionaron
+    global Tiempo_en_presionar
+    global Posicion
     while True:
         if Serial.in_waiting > 0:
             ByteSerial = int.from_bytes(
@@ -99,7 +105,7 @@ def RecepcionSerial():
                 EnvioSerial(3)
 
             else:
-                print("Error en RecepcionSerial")
+                print("Error en RecepcionSeriaal")
 
 
 HiloRecepcionSerial = threading.Thread(
@@ -108,6 +114,11 @@ HiloRecepcionSerial = threading.Thread(
 
 
 def EnvioSerial(var1):
+    global Serial
+    global UsuariosConectados
+    global Tiempo_inicio_pregunta
+    global NumeroPregunta
+    global Turno
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
