@@ -38,7 +38,7 @@
                 </div>
             </div>
         </div>
-        <form action="/ConexionUsuarios.html" method="post" enctype="multipart/form-data">
+        <form onsubmit="event.preventDefault(); sendData();">
             <label for="miArchivo">Seleccione las preguntas:</label>
             <input type="file" id="miArchivo" name="miArchivo" accept=".txt">
             <br>
@@ -125,11 +125,6 @@
                     }
                 });
             }
-
-            // Llama a la función sendData cuando se hace clic en un botón
-            document.querySelectorAll('#send-btn').forEach(function (btn) {
-                btn.addEventListener('click', sendData);
-            });
 
 
         </script>

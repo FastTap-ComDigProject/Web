@@ -375,6 +375,7 @@ def VectConUsu():
 def PaginaConexionUsuarios():
 
     if request.method == "POST":
+        return redirect(url_for("Juego"))
         print("se pulso")
         nombre = [None] * 5
         nombre[0] = request.form.get("input1")
@@ -400,10 +401,8 @@ def PaginaConexionUsuarios():
         if archivo.filename != "":
             filename = secure_filename("preguntas.txt")
             archivo.save(os.path.join(app.root_path, "static", filename))
-            return redirect(url_for("Juego"))
-        else:
-            return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
-    return render_template("ConexionUsuarios.html")
+
+    return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
 
 
 @app.route("/Juego.html", methods=["GET", "POST"])
