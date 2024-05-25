@@ -241,7 +241,7 @@ cursor_database.execute(
 conn_database.commit()
 
 
-def CargarPreguntasRespuestas(Ruta):  #
+def CargarPreguntasRespuestas(dottxt):  #
 
     Numero_Pregunta = 0
     Puntaje_Pregunta = 0
@@ -250,64 +250,65 @@ def CargarPreguntasRespuestas(Ruta):  #
     Posibles_Respuestas = ["", "", "", ""]
     contador = 0  # Incrementa con cada posible respuesta en la pregunta
 
-    with open(Ruta, "r") as archivo:
-        for linea in archivo:
-            if not Pregunta:
-                Numero_Pregunta += 1
-                Pregunta, Puntaje_Pregunta = linea.strip().split(
-                    "-"
-                )  # Divide la línea en la pregunta y el puntaje
-                Puntaje_Pregunta = int(
-                    Puntaje_Pregunta
-                )  # Convierte el puntaje a un entero
-                cursor_database.execute(
-                    f"ALTER TABLE Estadisticas_Jugadores ADD COLUMN Pregunta{Numero_Pregunta} INTEGER"
-                )
-                conn_database.commit()
+    lineas = dottxt.read().decode("utf-8").splitlines()
+
+    print(lineas)
+    for linea in lineas:
+        if not Pregunta:
+            Numero_Pregunta += 1
+            if "-" in linea:
+                Pregunta, Puntaje_Pregunta = linea.strip().split("-")
             else:
-                contador += 1
-                if linea.startswith(
-                    "*"
-                ):  # Respuesta correcta si la línea comienza con un asterisco
-                    Numero_Respuesta_Correcta = contador
-                    Posibles_Respuestas[contador - 1] = linea[
-                        1:
-                    ].strip()  # Guarda sin asterisco
-                else:  # De lo contrario es otra posible respuesta
-                    Posibles_Respuestas[contador - 1] = linea.strip()
+                print(
+                    f"La línea '{linea}' no contiene un '-'"
+                )  # Divide la línea en la pregunta y el puntaje
+            Puntaje_Pregunta = int(Puntaje_Pregunta)  # Convierte el puntaje a un entero
+            cursor_database.execute(
+                f"ALTER TABLE Estadisticas_Jugadores ADD COLUMN Pregunta{Numero_Pregunta} INTEGER"
+            )
+            conn_database.commit()
+        else:
+            contador += 1
+            if linea.startswith(
+                "*"
+            ):  # Respuesta correcta si la línea comienza con un asterisco
+                Numero_Respuesta_Correcta = contador
+                Posibles_Respuestas[contador - 1] = linea[
+                    1:
+                ].strip()  # Guarda sin asterisco
+            else:  # De lo contrario es otra posible respuesta
+                Posibles_Respuestas[contador - 1] = linea.strip()
 
-            if (
-                contador == 4
-            ):  # Si termino de leer todas las respuestas procede a guardar
-                cursor_database.execute(
-                    """
-                    INSERT INTO Preguntas_Respuestas(
-                        NumeroPregunta,
-                        PuntajePregunta,
-                        NumeroRespuestaCorrecta,
-                        Pregunta,
-                        PosibleRespuesta1,
-                        PosibleRespuesta2,
-                        PosibleRespuesta3,
-                        PosibleRespuesta4
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                    (
-                        Numero_Pregunta,
-                        Puntaje_Pregunta,
-                        Numero_Respuesta_Correcta,
-                        Pregunta,
-                        Posibles_Respuestas[0],
-                        Posibles_Respuestas[1],
-                        Posibles_Respuestas[2],
-                        Posibles_Respuestas[3],
-                    ),
-                )
+        if contador == 4:  # Si termino de leer todas las respuestas procede a guardar
+            cursor_database.execute(
+                """
+                INSERT INTO Preguntas_Respuestas(
+                    NumeroPregunta,
+                    PuntajePregunta,
+                    NumeroRespuestaCorrecta,
+                    Pregunta,
+                    PosibleRespuesta1,
+                    PosibleRespuesta2,
+                    PosibleRespuesta3,
+                    PosibleRespuesta4
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    Numero_Pregunta,
+                    Puntaje_Pregunta,
+                    Numero_Respuesta_Correcta,
+                    Pregunta,
+                    Posibles_Respuestas[0],
+                    Posibles_Respuestas[1],
+                    Posibles_Respuestas[2],
+                    Posibles_Respuestas[3],
+                ),
+            )
 
-                Puntaje_Pregunta = 0
-                Numero_Respuesta_Correcta
-                Pregunta = ""
-                Posibles_Respuestas = ["", "", "", ""]
+            Puntaje_Pregunta = 0
+            Numero_Respuesta_Correcta
+            Pregunta = ""
+            Posibles_Respuestas = ["", "", "", ""]
 
     conn_database.commit()  # Guarda todos los cambios realizados a la base de datos
 
@@ -399,8 +400,8 @@ def PaginaConexionUsuarios():
         conn_database.commit()
         archivo = request.files["miArchivo"]
         if archivo.filename != "":
-            filename = secure_filename("preguntas.txt")
-            archivo.save(os.path.join(app.root_path, "static", filename))
+            CargarPreguntasRespuestas(archivo)
+
         return "/Juego.html"  # Pagina a donde redirigir
 
     return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
