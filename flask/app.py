@@ -419,9 +419,6 @@ def PaginaJuego():
     return render_template("Juego.html", EstJugadores=EstJugadores)
 
 
-ConsultarPreguntasRespuestas()
-
-
 @app.route("/ControlPregunta")
 def ControlPregunta():
     if request.method == "POST":
