@@ -37,6 +37,7 @@ Tiempo_inicio_pregunta = 0
 Tiempo_en_presionar = [0] * 5
 PuestosFinales = [None] * 5
 Conectado = 0
+PreguntaActual = 0
 
 
 global integer_value
