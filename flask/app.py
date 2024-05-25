@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM7"
+Puerto = "COM5"
 
 global Serial
 global PorcentajeBaterias
@@ -329,6 +329,14 @@ def ConsultarPreguntasRespuestas():
     return cursor_database.fetchone()
 
 
+def solicitud_nombre():
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+    cursor.execute("SELECT Nombre FROM Estadisticas_Jugadores")
+    nombres = cursor.fetchall()
+    conexion.close()
+    return nombres
+
 def ConsultarEstadisticasJugadores():
 
     matriX = [None] * 5
@@ -351,8 +359,14 @@ def IniciarComSer():
     global Conectado
     if Conectado == 0:
         Conectado = IniciarComunicacionSerial()
-
     return jsonify({"Conectado": Conectado})
+
+@app.route("/datadb")
+def datadb():
+    datadb = solicitud_nombre()
+    print(datadb)
+    return jsonify({"solicitud_nombres": datadb})
+
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -407,7 +421,7 @@ def PaginaConexionUsuarios():
 
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
-    return render_template("Juego.html")
+    return render_template("Juego.html",datadb=datadb)
 
 
 if __name__ == "__main__":
