@@ -223,7 +223,7 @@
                         <div class="datos">
                             <div class="nombre-puntaje">
                                 <div class="nombre" id="nombre"></div>
-                                <div class="puntaje">0</div>
+                                <div class="puntaje" id="puntaje"></div>
                             </div>
                         </div>
                     </div>
@@ -236,7 +236,7 @@
                         <div class="datos">
                             <div class="nombre-puntaje">
                                 <div id=nombre1 class="nombre"></div>
-                                <div class="puntaje">0</div>
+                                <div class="puntaje" id="puntaje1"></div>
                             </div>
                         </div>
                     </div>
@@ -249,7 +249,7 @@
                         <div class="datos">
                             <div class="nombre-puntaje">
                                 <div class="nombre" id="nombre2"></div>
-                                <div class="puntaje">0</div>
+                                <div class="puntaje" id="puntaje2"></div>
                             </div>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
                         <div class="datos">
                             <div class="nombre-puntaje">
                                 <div class="nombre" id="nombre3"></div>
-                                <div class="puntaje">0</div>
+                                <div class="puntaje" id="puntaje3"></div>
                             </div>
                         </div>
                     </div>
@@ -379,6 +379,10 @@
                     document.getElementById('nombre1').textContent = EstJugadores[1][1];
                     document.getElementById('nombre2').textContent = EstJugadores[2][1];
                     document.getElementById('nombre3').textContent = EstJugadores[3][1];
+                    document.getElementById('puntaje').textContent = EstJugadores[0][2];
+                    document.getElementById('puntaje1').textContent = EstJugadores[1][2];
+                    document.getElementById('puntaje2').textContent = EstJugadores[2][2];
+                    document.getElementById('puntaje3').textContent = EstJugadores[3][2];
                 });
         }
 
