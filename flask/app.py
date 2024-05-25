@@ -163,7 +163,7 @@ def EnvioSerial(var1):
         Serial.write(b"\x04" + turno_bytes)
 
     elif var1 == 5:  # Envio a jugador que contesto correctamente
-        usuario_bytes = (Usuario).to_bytes(1, "big")
+        usuario_bytes = (Turno).to_bytes(1, "big")
         Serial.write(b"\x05" + usuario_bytes)
 
     elif var1 == 6:  # Envio de puestos finales
@@ -305,6 +305,7 @@ def CargarPreguntasRespuestas(dottxt):  #
                 ),
             )
 
+            contador = 0
             Puntaje_Pregunta = 0
             Numero_Respuesta_Correcta
             Pregunta = ""
@@ -323,6 +324,7 @@ def ConsultarJugadoresConectados():
 
 
 def ConsultarPreguntasRespuestas():
+    global PreguntaActual
     PreguntaActual += 1
     cursor_database.execute(
         "SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (PreguntaActual,)
@@ -415,6 +417,23 @@ def VectConUsu():
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
     return render_template("Juego.html", EstJugadores=EstJugadores)
+
+
+ConsultarPreguntasRespuestas()
+
+
+@app.route("/ControlPregunta")
+def ControlPregunta():
+    if request.method == "POST":
+        id = request.form.get("id")
+        if id == "SIGUIENTE":
+            EnvioSerial(2)
+            EnvioSerial(1)
+            return ConsultarPreguntasRespuestas()
+        if id == "BIEN":
+            EnvioSerial(5)
+        if id == "MAL":
+            EnvioSerial(4)
 
 
 @app.route("/EstJugadores")
