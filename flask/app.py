@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -19,7 +19,6 @@ global UsuariosConectados
 global PuntajeJugador
 global PuntajePregunta
 global Presionaron
-global NumeroPregunta
 global Posicion
 global Turno
 global PuestosFinales
@@ -67,6 +66,7 @@ def RecepcionSerial():
     global Presionaron
     global Tiempo_en_presionar
     global Posicion
+
     while True:
         if Serial.in_waiting > 0:
             ByteSerial = int.from_bytes(
@@ -118,9 +118,9 @@ def EnvioSerial(var1):
     global Serial
     global UsuariosConectados
     global Tiempo_inicio_pregunta
-    global NumeroPregunta
+    global PreguntaActual
     global Turno
-    global posicion
+    global Posicion
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
@@ -143,14 +143,18 @@ def EnvioSerial(var1):
     elif var1 == 2:  # Iniciar nueva pregunta
         Tiempo_inicio_pregunta = time.time()
         Posicion = 0
+        for i in range(5):
+            Presionaron[i] = 0
+            Tiempo_en_presionar[i] = 0
+
         cursor_database.execute(
             """SELECT PuntajePregunta FROM Preguntas_Respuestas 
                                         WHERE NumeroPregunta=?""",
-            (NumeroPregunta,),
+            (PreguntaActual,),
         )
         PuntajePregunta = cursor_database.fetchone()
         if PuntajePregunta is not None:
-            numero_pregunta_bytes = (NumeroPregunta).to_bytes(1, "big")
+            numero_pregunta_bytes = (PreguntaActual).to_bytes(1, "big")
             puntaje_pregunta_bytes = (PuntajePregunta).to_bytes(1, "big")
             Serial.write(b"\x02" + numero_pregunta_bytes + puntaje_pregunta_bytes)
 
@@ -164,6 +168,25 @@ def EnvioSerial(var1):
         Serial.write(b"\x04" + turno_bytes)
 
     elif var1 == 5:  # Envio a jugador que contesto correctamente
+        cursor_database.execute(
+            """SELECT PuntajePregunta FROM Preguntas_Respuestas 
+                                        WHERE NumeroPregunta=?""",
+            (PreguntaActual,),
+        )
+        PuntajePregunta = cursor_database.fetchone()
+        cursor_database.execute(
+            """SELECT Puntaje FROM Estadisticas_Jugadores 
+                                        WHERE NumeroJugador=?""",
+            (Turno,),
+        )
+        PuntajeJugador = cursor_database.fetchone()
+        cursor_database.execute(
+            """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
+                                        WHERE NumeroJugador = ?""",
+            (PuntajeJugador + PuntajePregunta, Turno),
+        )
+        conn_database.commit()
+
         usuario_bytes = (Turno).to_bytes(1, "big")
         Serial.write(b"\x05" + usuario_bytes)
 
@@ -327,10 +350,13 @@ def ConsultarJugadoresConectados():
 def ConsultarPreguntasRespuestas():
     global PreguntaActual
     PreguntaActual += 1
+    print("database")
     cursor_database.execute(
         "SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (PreguntaActual,)
     )
-    return cursor_database.fetchone()
+    var2 = cursor_database.fetchone()
+    print(var2)
+    return var2
 
 
 def ConsultarEstadisticasJugadores():
@@ -386,8 +412,6 @@ def PaginaConexionUsuarios():
         nombre[1] = request.form.get("input2")
         nombre[2] = request.form.get("input3")
         nombre[3] = request.form.get("input4")
-        print(nombre[0])
-        print(nombre[1])
         for Usuario in range(5):
             cursor_database.execute(
                 """SELECT NumeroJugador FROM Estadisticas_Jugadores 
@@ -417,6 +441,7 @@ def VectConUsu():
 
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
+    print("de juego")
     return render_template(
         "Juego.html", EstJugadores=EstJugadores, PregResp=ConsultarPreguntasRespuestas()
     )
@@ -427,13 +452,14 @@ def ControlPregunta():
     if request.method == "POST":
         id = request.form.get("id")
         if id == "SIGUIENTE":
-            EnvioSerial(2)
-            EnvioSerial(1)
+            EnvioSerial(2)  # Iniciar nueva pregunta
+            EnvioSerial(1)  # Enviar puntaje jugadores
+            print("de control")
             return ConsultarPreguntasRespuestas()
         if id == "BIEN":
-            EnvioSerial(5)
+            EnvioSerial(5)  # Envio a jugador que contesto correctamente
         if id == "MAL":
-            EnvioSerial(4)
+            EnvioSerial(4)  # Envio turno actual del jugador a responder
 
 
 @app.route("/EstJugadores")
