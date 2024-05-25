@@ -377,10 +377,12 @@ def PaginaConexionUsuarios():
     if request.method == "POST":
         print("se pulso")
         nombre = [None] * 5
-        nombre[1] = request.form.get('input1')
-        nombre[2] = request.form.get("input2")
-        nombre[3] = request.form.get("input3")
-        nombre[4] = request.form.get("input4")
+        nombre[0] = request.form.get('input1')
+        nombre[1] = request.form.get("input2")
+        nombre[2] = request.form.get("input3")
+        nombre[3] = request.form.get("input4")
+        print(nombre[0])
+        print(nombre[1])
         for Usuario in range(5):
             cursor_database.execute(
                 """SELECT NumeroJugador FROM Estadisticas_Jugadores 
