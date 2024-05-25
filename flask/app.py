@@ -396,12 +396,11 @@ def PaginaConexionUsuarios():
                     (nombre[Usuario], Usuario),
                 )
         conn_database.commit()
-        if "miArchivo" in request.files:
-            archivo = request.files["miArchivo"]
-            if archivo.filename != "":
-                filename = secure_filename("preguntas.txt")
-                archivo.save(os.path.join(app.root_path, "static", filename))
-                return redirect(url_for("Juego"))
+        archivo = request.files["miArchivo"]
+        if archivo.filename != "":
+            filename = secure_filename("preguntas.txt")
+            archivo.save(os.path.join(app.root_path, "static", filename))
+            return redirect(url_for("Juego"))
         else:
             return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
     return render_template("ConexionUsuarios.html")
