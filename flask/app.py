@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -32,9 +32,9 @@ UsuariosConectados = (
     0b00000000  # Esta variable almacenara en cada bit los usuarios conectados
 )
 PorcentajeBaterias = [None] * 5
-Presionaron = [None] * 5
+Presionaron = [0] * 5
 Tiempo_inicio_pregunta = 0
-Tiempo_en_presionar = [None] * 5
+Tiempo_en_presionar = [0] * 5
 PuestosFinales = [None] * 5
 Conectado = 0
 
@@ -86,8 +86,8 @@ def RecepcionSerial():
                     print(f"Usuarios conectados: {UsuariosConectados}")
                     cursor_database.execute(
                         """INSERT INTO Estadisticas_Jugadores(
-                                            NumeroJugador) VALUES (?)""",
-                        (Usuario,),
+                                            NumeroJugador, Puntaje) VALUES (?,?)""",
+                        (Usuario, 0),
                     )
                     conn_database.commit()
 
@@ -329,44 +329,28 @@ def ConsultarPreguntasRespuestas():
     return cursor_database.fetchone()
 
 
-def solicitud_nombre():
-    conexion = sqlite3.connect('database.db')
-    cursor = conexion.cursor()
-    cursor.execute("SELECT Nombre FROM Estadisticas_Jugadores")
-    nombres = cursor.fetchall()
-    conexion.close()
-    return nombres
-
 def ConsultarEstadisticasJugadores():
+    global Presionaron
+    global Tiempo_en_presionar
 
-    matriX = [None] * 5
+    matriz = [None] * 5
     for i in range(5):
         cursor_database.execute(
             """SELECT NumeroJugador, Nombre, Puntaje FROM
                                 Estadisticas_Jugadores WHERE NumeroJugador=?""",
             (i,),
         )
-        matriX[i] = cursor_database.fetchone()
-        matriX[i][3] = Presionaron[i]
-        matriX[i][4] = Tiempo_en_presionar[i]
+        fetch_result = cursor_database.fetchone()
+        if fetch_result is not None:
+            matriz[i] = fetch_result + tuple(
+                [
+                    Presionaron[i],
+                    Tiempo_en_presionar[i],
+                ]
+            )
     return sorted(
-        matriX, key=lambda x: x[4]
+        [x for x in matriz if x is not None], key=lambda x: x[4]
     )  # Ordena la matriz segun el tiempo en presionar y devuelve
-
-
-@app.route("/IniciarComSer")
-def IniciarComSer():
-    global Conectado
-    if Conectado == 0:
-        Conectado = IniciarComunicacionSerial()
-    return jsonify({"Conectado": Conectado})
-
-@app.route("/datadb")
-def datadb():
-    datadb = solicitud_nombre()
-    print(datadb)
-    return jsonify({"solicitud_nombres": datadb})
-
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -380,9 +364,12 @@ def home():
     return render_template("index.html", IniciarComSer=IniciarComSer)
 
 
-@app.route("/VectConUsu")
-def VectConUsu():
-    return jsonify({"JugadoresConectados": ConsultarJugadoresConectados()})
+@app.route("/IniciarComSer")
+def IniciarComSer():
+    global Conectado
+    if Conectado == 0:
+        Conectado = IniciarComunicacionSerial()
+    return jsonify({"Conectado": Conectado})
 
 
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])
@@ -419,9 +406,20 @@ def PaginaConexionUsuarios():
     return render_template("ConexionUsuarios.html", VectConUsu=VectConUsu)
 
 
+@app.route("/VectConUsu")
+def VectConUsu():
+    return jsonify({"JugadoresConectados": ConsultarJugadoresConectados()})
+
+
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
-    return render_template("Juego.html",datadb=datadb)
+    return render_template("Juego.html", EstJugadores=EstJugadores)
+
+
+@app.route("/EstJugadores")
+def EstJugadores():
+    EstJugadores = ConsultarEstadisticasJugadores()
+    return jsonify({"EstJugadores": EstJugadores})
 
 
 if __name__ == "__main__":

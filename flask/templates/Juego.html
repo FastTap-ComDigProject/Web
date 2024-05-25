@@ -372,9 +372,9 @@
             cargarRespuestas();
         };
         function getData() {
-                $.get('/datadb', function (response) {
-                    var datadb = response.solicitud_nombres;
-                    console.log(datadb);
+                $.get('/EstJugadores', function (response) {
+                    var EstJugadores = response.EstJugadores;
+                    console.log(EstJugadores);
                 });
         }
 
