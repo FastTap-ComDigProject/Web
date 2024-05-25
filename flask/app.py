@@ -181,6 +181,11 @@ def EnvioSerial(var1):
         )
         PuntajeJugador = cursor_database.fetchone()
         cursor_database.execute(
+            f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
+                                        WHERE NumeroJugador = ?""",
+            (PuntajePregunta, Turno),
+        )
+        cursor_database.execute(
             """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
                                         WHERE NumeroJugador = ?""",
             (PuntajeJugador + PuntajePregunta, Turno),
@@ -222,7 +227,7 @@ def EnvioSerial(var1):
             serial.write(b"\x06" + usuario_bytes + posicion_final_bytes + puntaje_bytes)
 
     else:
-        print("error")
+        print("error envio serial")
 
 
 # Conexion base de datos
