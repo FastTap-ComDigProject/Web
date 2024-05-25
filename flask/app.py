@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -417,7 +417,9 @@ def VectConUsu():
 
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
-    return render_template("Juego.html", EstJugadores=EstJugadores)
+    return render_template(
+        "Juego.html", EstJugadores=EstJugadores, PregResp=ConsultarPreguntasRespuestas()
+    )
 
 
 @app.route("/ControlPregunta")
