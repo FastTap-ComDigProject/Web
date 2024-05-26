@@ -288,89 +288,17 @@
     <script>
         $(document).ready(function () {
             $.ajax({
-                url: '/Juego.html',
-                type: 'GET',
-                success: function (response) {
-                    console.log(response);
-                    // Aquí puedes usar los datos 'response' para actualizar tu frontend
-                    // Por ejemplo, si 'response' es un objeto con una propiedad 'nombres', podrías hacer:
-                    var nombres = response.nombres;
-                    console.log(response);
-                    $('#nombre').text(nombres[0]);
+                url: '/ControlPregunta',
+                method: 'POST',
+                data: { id: 'SIGUIENTE' },
+                success: function (data) {
+                    console.log(data);
                 },
                 error: function (error) {
                     console.log(error);
                 }
             });
         });
-
-
-        window.onload = function () {
-            fetch('/static/preguntas.txt')
-                .then(response => response.text())
-                .then(data => {
-                    let lineas = data.split('\n');
-                    var boton = document.getElementById('correct-btn');
-                    document.getElementById('question').innerText = lineas[0];
-                    let indice = 0;
-                    let numeroPregunta = 1;
-                    boton.addEventListener('click', function () {
-                        getData().then(cantidad_pre => {
-                            indice = indice + 5;
-                            if (indice < cantidad_pre * 5) {
-                                document.getElementById('question').innerText = lineas[indice];
-                                console.log('¡Botón pulsado!');
-                                // Incrementamos el número de la pregunta
-                                numeroPregunta++;
-                                // Actualizamos el texto del h1 con el nuevo número de pregunta
-                                document.getElementById('numeroPregunta').innerText = '¡PREGUNTA NO. ' + numeroPregunta + '!';
-                            } else {
-                                console.log('Se ha alcanzado el límite de líneas');
-                            }
-                        }).catch(error => {
-                            console.log(error);
-                        });
-                    });
-                })
-                .catch(error => console.error(error));
-            let indice = 1;
-            function cargarRespuestas() {
-                fetch('/static/preguntas.txt')
-                    .then(response => response.text())
-                    .then(data => {
-                        let lineas = data.split('\n');
-                        let j = 1;
-                        for (let i = indice; i < lineas.length && j <= 4; i++) {
-                            // Si la línea no es una pregunta (no termina en '?'), se considera una respuesta
-                            if (!lineas[i].endsWith('?')) {
-                                let esCorrecta = false;
-                                // Si la respuesta es correcta (comienza con '*'), se elimina el asterisco
-                                if (lineas[i].startsWith('*')) {
-                                    lineas[i] = lineas[i].substring(1);
-                                    esCorrecta = true;
-                                }
-                                let respuesta = document.getElementById('answer' + j);
-                                respuesta.innerText = lineas[i];
-                                respuesta.addEventListener('click', function () {
-                                    if (esCorrecta) {
-                                        console.log('La respuesta seleccionada es correcta.');
-                                    } else {
-                                        console.log('La respuesta seleccionada es incorrecta.');
-                                    }
-                                });
-                                j++;
-                            }
-                        }
-                        indice += 5;
-                    })
-                    .catch(error => console.error(error));
-            }
-
-            document.getElementById('correct-btn').addEventListener('click', cargarRespuestas);
-
-            // Cargar las primeras respuestas al inicio
-            cargarRespuestas();
-        };
         function getData() {
             $.get('/EstJugadores', function (response) {
                 var EstJugadores = response.EstJugadores;
@@ -384,29 +312,9 @@
                 document.getElementById('puntaje2').textContent = EstJugadores[2][2];
                 document.getElementById('puntaje3').textContent = EstJugadores[3][2];
             });
-            $.ajax({
-                url: '/Juego.html',
-                method: 'GET',
-                success: function (data) {
-                    // Aquí puedes manejar la respuesta del servidor
-                    console.log(data);
-                },
-                error: function (error) {
-                    // Aquí puedes manejar los errores
-                    console.log(error);
-                }
-            });
-
-
         }
-
-
         getData();
-        setInterval(getData, 1000);  // Asegúrate de que este intervalo es adecuado
-
-
-
-
+        setInterval(getData, 10000);  // Asegúrate de que este intervalo es adecuado
     </script>
 </body>
 
