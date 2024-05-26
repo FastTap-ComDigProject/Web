@@ -272,7 +272,7 @@
     </div>
 
     <div class="pregunta-container">
-        <h1 id="numeroPregunta">¡PREGUNTA NO. 1!</h1>
+        <h1 id="numeroPregunta"></h1>
         <p id="question"></p>
         <div class="answers">
             <div id="answer1" class="answer"></div>
@@ -292,13 +292,29 @@
                 method: 'POST',
                 data: { id: 'SIGUIENTE' },
                 success: function (data) {
-                    console.log(data);
+                    // Elimina los paréntesis al principio y al final y divide la cadena por las comas
+                    var array = data.slice(1, -1).split(',');
+
+                    // Convierte cada elemento del array a un número si es posible, de lo contrario deja el valor original
+                    var numbers = array.map(function (item) {
+                        return isNaN(Number(item)) ? item : Number(item);
+                    });
+
+                    console.log(numbers);
+
+                    document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
+                    document.getElementById('question').textContent = numbers[3];
+                    document.getElementById('answer1').textContent = numbers[4];
+                    document.getElementById('answer2').textContent = numbers[5];
+                    document.getElementById('answer3').textContent = numbers[6];
+                    document.getElementById('answer4').textContent = numbers[7];
                 },
                 error: function (error) {
                     console.log(error);
                 }
             });
         });
+
         function getData() {
             $.get('/EstJugadores', function (response) {
                 var EstJugadores = response.EstJugadores;
