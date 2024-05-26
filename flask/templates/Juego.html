@@ -299,22 +299,31 @@
                     var numbers = array.map(function (item) {
                         return isNaN(Number(item)) ? item : Number(item);
                     });
-
                     console.log(numbers);
-
                     document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
                     document.getElementById('question').textContent = numbers[3];
                     document.getElementById('answer1').textContent = numbers[4];
                     document.getElementById('answer2').textContent = numbers[5];
                     document.getElementById('answer3').textContent = numbers[6];
                     document.getElementById('answer4').textContent = numbers[7];
+                    ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
+                        $('#' + answerID).click(function () {
+                            // Obtiene el número de la respuesta correcta
+                            var correctAnswerNumber = numbers[2];
+                            // Comprueba si la respuesta seleccionada es la correcta
+                            if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
+                                console.log('Correcto: ' + answerID);
+                            } else {
+                                console.log('Incorrecto: ' + answerID);
+                            }
+                        });
+                    });
                 },
                 error: function (error) {
                     console.log(error);
                 }
             });
         });
-
         function getData() {
             $.get('/EstJugadores', function (response) {
                 var EstJugadores = response.EstJugadores;
