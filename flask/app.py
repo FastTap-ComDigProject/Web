@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -137,7 +137,7 @@ def EnvioSerial(var1):
             Puntaje = cursor_database.fetchone()
             if Puntaje is not None:
                 usuario_bytes = (Usuario).to_bytes(1, "big")
-                puntaje_bytes = Puntaje[0].to_bytes(1, "big")
+                puntaje_bytes = (Puntaje[0]).to_bytes(1, "big")
                 Serial.write(b"\x01" + usuario_bytes + puntaje_bytes)
 
     elif var1 == 2:  # Iniciar nueva pregunta
@@ -155,7 +155,7 @@ def EnvioSerial(var1):
         PuntajePregunta = cursor_database.fetchone()
         if PuntajePregunta is not None:
             numero_pregunta_bytes = (PreguntaActual).to_bytes(1, "big")
-            puntaje_pregunta_bytes = PuntajePregunta[0].to_bytes(1, "big")
+            puntaje_pregunta_bytes = (PuntajePregunta[0]).to_bytes(1, "big")
             Serial.write(b"\x02" + numero_pregunta_bytes + puntaje_pregunta_bytes)
 
     elif var1 == 3:  # Envio posicion del jugador
@@ -183,12 +183,12 @@ def EnvioSerial(var1):
         cursor_database.execute(
             f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
                                         WHERE NumeroJugador = ?""",
-            (PuntajePregunta, Turno),
+            (PuntajePregunta[0], Turno),
         )
         cursor_database.execute(
             """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
                                         WHERE NumeroJugador = ?""",
-            (PuntajeJugador + PuntajePregunta, Turno),
+            (PuntajeJugador[0] + PuntajePregunta[0], Turno),
         )
         conn_database.commit()
 
@@ -354,15 +354,13 @@ def ConsultarJugadoresConectados():
 
 def ConsultarPreguntasRespuestas():
     global PreguntaActual
-    PreguntaActual += 1
-    cursor = conn_database.cursor()
     print("database")
     cursor_database.execute(
         "SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (PreguntaActual,)
     )
     var2 = cursor_database.fetchone()
-    print(var2)
-    return var2
+    print(str(var2))
+    return str(var2)
 
 
 def ConsultarEstadisticasJugadores():
@@ -447,26 +445,26 @@ def VectConUsu():
 
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
-    return render_template(
-        "Juego.html", EstJugadores=EstJugadores
-    )
+    return render_template("Juego.html", EstJugadores=EstJugadores)
 
 
-@app.route("/ControlPregunta", methods=['GET', 'POST'])
+@app.route("/ControlPregunta", methods=["GET", "POST"])
 def ControlPregunta():
+    global PreguntaActual
     if request.method == "POST":
         id = request.form.get("id")
         if id == "SIGUIENTE":
-            print("Si2")
+            print("de control")
+            PreguntaActual += 1
             EnvioSerial(2)  # Iniciar nueva pregunta
             EnvioSerial(1)  # Enviar puntaje jugadores
-            print("de control")
             return ConsultarPreguntasRespuestas()
         if id == "BIEN":
             EnvioSerial(5)  # Envio a jugador que contesto correctamente
         if id == "MAL":
             EnvioSerial(4)  # Envio turno actual del jugador a responder
     return "Solicitud no válida", 400
+
 
 @app.route("/EstJugadores")
 def EstJugadores():
