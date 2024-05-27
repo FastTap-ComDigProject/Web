@@ -324,6 +324,7 @@
                                 $('#answer3').css('background-color', 'grey');
                                 $('#answer4').css('cursor', 'not-allowed');
                                 $('#answer4').css('background-color', 'grey');
+                                $('#' + answerID).css('background-color', 'green');
                                 $.ajax({
                                     url: '/ControlPregunta',
                                     method: 'POST',
@@ -398,6 +399,7 @@
                                     $('#answer3').css('background-color', 'grey');
                                     $('#answer4').css('cursor', 'not-allowed');
                                     $('#answer4').css('background-color', 'grey');
+                                    $('#' + answerID).css('background-color', 'green');
                                     $.ajax({
                                         url: '/ControlPregunta',
                                         method: 'POST',
