@@ -355,6 +355,71 @@
                     console.log(error);
                 }
             });
+            $('#correct-btn').click(function () {
+                $.ajax({
+                    url: '/ControlPregunta',
+                    method: 'POST',
+                    data: { id: 'SIGUIENTE' },
+                    success: function (data) {
+                        console.log('POST exitoso con id SIGUIENTE');
+                        var array = data.slice(1, -1).split(',');
+                        var numbers = array.map(function (item) {
+                            return isNaN(Number(item)) ? item : Number(item);
+                        });
+                        console.log(numbers);
+                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
+                        document.getElementById('question').textContent = numbers[3];
+                        document.getElementById('answer1').textContent = numbers[4];
+                        document.getElementById('answer2').textContent = numbers[5];
+                        document.getElementById('answer3').textContent = numbers[6];
+                        document.getElementById('answer4').textContent = numbers[7];
+                        ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
+                            $('#' + answerID).click(function () {
+                                var correctAnswerNumber = numbers[2];
+                                if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
+                                    console.log('Correcto: ' + answerID);
+                                    $('#correct-btn').prop('disabled', false);
+                                    $('#answer1').css('cursor', 'not-allowed');
+                                    $('#answer1').css('background-color', 'grey');
+                                    $('#answer2').css('cursor', 'not-allowed');
+                                    $('#answer2').css('background-color', 'grey');
+                                    $('#answer3').css('cursor', 'not-allowed');
+                                    $('#answer3').css('background-color', 'grey');
+                                    $('#answer4').css('cursor', 'not-allowed');
+                                    $('#answer4').css('background-color', 'grey');
+                                    $.ajax({
+                                        url: '/ControlPregunta',
+                                        method: 'POST',
+                                        data: { id: 'BIEN' },
+                                        success: function (data) {
+                                            console.log('Respuesta correcta enviada al backend');
+                                        },
+                                        error: function (error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                } else {
+                                    console.log('Incorrecto: ' + answerID);
+                                    $.ajax({
+                                        url: '/ControlPregunta',
+                                        method: 'POST',
+                                        data: { id: 'MAL' },
+                                        success: function (data) {
+                                            console.log('Respuesta correcta enviada al backend');
+                                        },
+                                        error: function (error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
         });
         function getData() {
             $.get('/EstJugadores', function (response) {
