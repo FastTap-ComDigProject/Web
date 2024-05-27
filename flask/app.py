@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM11"
+Puerto = "COM5"
 
 global Serial
 global PorcentajeBaterias
@@ -140,7 +140,7 @@ def EnvioSerial(var1):
             Puntaje = cursor_database.fetchone()
             if Puntaje is not None:
                 usuario_bytes = (Usuario).to_bytes(1, "big")
-                puntaje_bytes = (Puntaje[0]).to_bytes(1, "big")
+                puntaje_bytes = (int(Puntaje[0] / 50)).to_bytes(1, "big")
                 Serial.write(b"\x01" + usuario_bytes + puntaje_bytes)
 
     elif var1 == 2:  # Iniciar nueva pregunta
