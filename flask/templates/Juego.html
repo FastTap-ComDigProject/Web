@@ -205,6 +205,12 @@
                 /* Elemento completamente visible al final */
             }
         }
+
+        .correcto-btn:disabled {
+            background-color: grey;
+            color: white;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -280,21 +286,19 @@
             <div id="answer3" class="answer"></div>
             <div id="answer4" class="answer"></div>
         </div>
-
         <div class="buttons">
-            <a class="correcto-btn" id="correct-btn">Siguiente</a>
+            <button class="correcto-btn" id="correct-btn" disabled>Siguiente</button>
         </div>
     </div>
     <script>
         $(document).ready(function () {
+            $('#correct-btn').prop('disabled', true);
             $.ajax({
                 url: '/ControlPregunta',
                 method: 'POST',
                 data: { id: 'SIGUIENTE' },
                 success: function (data) {
-                    // Elimina los paréntesis al principio y al final y divide la cadena por las comas
                     var array = data.slice(1, -1).split(',');
-                    // Convierte cada elemento del array a un número si es posible, de lo contrario deja el valor original
                     var numbers = array.map(function (item) {
                         return isNaN(Number(item)) ? item : Number(item);
                     });
@@ -310,6 +314,15 @@
                             var correctAnswerNumber = numbers[2];
                             if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
                                 console.log('Correcto: ' + answerID);
+                                $('#correct-btn').prop('disabled', false);
+                                $('#answer1').css('cursor', 'not-allowed');
+                                $('#answer1').css('background-color', 'grey');
+                                $('#answer2').css('cursor', 'not-allowed');
+                                $('#answer2').css('background-color', 'grey');
+                                $('#answer3').css('cursor', 'not-allowed');
+                                $('#answer3').css('background-color', 'grey');
+                                $('#answer4').css('cursor', 'not-allowed');
+                                $('#answer4').css('background-color', 'grey');
                                 $.ajax({
                                     url: '/ControlPregunta',
                                     method: 'POST',
