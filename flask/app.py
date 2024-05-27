@@ -456,8 +456,8 @@ def ControlPregunta():
         if id == "SIGUIENTE":
             print("de control")
             PreguntaActual += 1
-            EnvioSerial(2)  # Iniciar nueva pregunta
-            EnvioSerial(1)  # Enviar puntaje jugadores
+            EnvioSerial(2)
+            EnvioSerial(1)
             return ConsultarPreguntasRespuestas()
         if id == "BIEN":
             EnvioSerial(5)  # Envio a jugador que contesto correctamente

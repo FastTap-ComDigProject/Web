@@ -294,7 +294,6 @@
                 success: function (data) {
                     // Elimina los paréntesis al principio y al final y divide la cadena por las comas
                     var array = data.slice(1, -1).split(',');
-
                     // Convierte cada elemento del array a un número si es posible, de lo contrario deja el valor original
                     var numbers = array.map(function (item) {
                         return isNaN(Number(item)) ? item : Number(item);
@@ -308,13 +307,33 @@
                     document.getElementById('answer4').textContent = numbers[7];
                     ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
                         $('#' + answerID).click(function () {
-                            // Obtiene el número de la respuesta correcta
                             var correctAnswerNumber = numbers[2];
-                            // Comprueba si la respuesta seleccionada es la correcta
                             if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
                                 console.log('Correcto: ' + answerID);
+                                $.ajax({
+                                    url: '/ControlPregunta',
+                                    method: 'POST',
+                                    data: { id: 'BIEN' },
+                                    success: function (data) {
+                                        console.log('Respuesta correcta enviada al backend');
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                    }
+                                });
                             } else {
                                 console.log('Incorrecto: ' + answerID);
+                                $.ajax({
+                                    url: '/ControlPregunta',
+                                    method: 'POST',
+                                    data: { id: 'MAL' },
+                                    success: function (data) {
+                                        console.log('Respuesta correcta enviada al backend');
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                    }
+                                });
                             }
                         });
                     });
@@ -339,7 +358,7 @@
             });
         }
         getData();
-        setInterval(getData, 10000);  // Asegúrate de que este intervalo es adecuado
+        setInterval(getData, 10000);
     </script>
 </body>
 
