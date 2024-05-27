@@ -90,7 +90,7 @@ def RecepcionSerial():
                         Usuario
                     )  # Pone en alto un bit especifico
                     NUsuariosConectados += 1
-                    print(f"UsuariosConectados: {UsuariosConectados}")
+                    print(f"UsuariosConectados: {NUsuariosConectados}")
                     cursor_database.execute(
                         """INSERT INTO Estadisticas_Jugadores(
                                             NumeroJugador, Puntaje) VALUES (?,?)""",
