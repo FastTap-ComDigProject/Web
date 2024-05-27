@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM11"
 
 global Serial
 global PorcentajeBaterias
@@ -37,6 +37,7 @@ Tiempo_en_presionar = [0] * 5
 PuestosFinales = [None] * 5
 Conectado = 0
 PreguntaActual = 0
+Turno = 0
 
 
 global integer_value
@@ -66,6 +67,7 @@ def RecepcionSerial():
     global Presionaron
     global Tiempo_en_presionar
     global Posicion
+    global Usuario
 
     while True:
         if Serial.in_waiting > 0:
@@ -121,6 +123,7 @@ def EnvioSerial(var1):
     global PreguntaActual
     global Turno
     global Posicion
+    global Usuario
 
     print(f"Enviando con identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
@@ -143,6 +146,7 @@ def EnvioSerial(var1):
     elif var1 == 2:  # Iniciar nueva pregunta
         Tiempo_inicio_pregunta = time.time()
         Posicion = 0
+        Turno = 0
         for i in range(5):
             Presionaron[i] = 0
             Tiempo_en_presionar[i] = 0
@@ -161,10 +165,13 @@ def EnvioSerial(var1):
     elif var1 == 3:  # Envio posicion del jugador
         usuario_bytes = (Usuario).to_bytes(1, "big")
         posicion_bytes = (Posicion).to_bytes(1, "big")
+        print(f"Envio posicion jugador, usuario: {Usuario}")
         Serial.write(b"\x03" + usuario_bytes + posicion_bytes)
 
     elif var1 == 4:  # Envio turno actual del jugador a responder
+        Turno += 1
         turno_bytes = (Turno).to_bytes(1, "big")
+        print(f"Envio turno actual del jugador a responder, Turno: {Turno}")
         Serial.write(b"\x04" + turno_bytes)
 
     elif var1 == 5:  # Envio a jugador que contesto correctamente
@@ -192,6 +199,7 @@ def EnvioSerial(var1):
         )
         conn_database.commit()
 
+        print(f"Envio a jugador que contesto correctamente, usuario: {Turno}")
         usuario_bytes = (Turno).to_bytes(1, "big")
         Serial.write(b"\x05" + usuario_bytes)
 
