@@ -311,7 +311,7 @@
                     document.getElementById('answer3').textContent = numbers[6];
                     document.getElementById('answer4').textContent = numbers[7];
                     ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
-                        $('#' + answerID).click(function () {
+                        $('#' + answerID).off('click').click(function () {
                             var correctAnswerNumber = numbers[2];
                             if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
                                 console.log('Correcto: ' + answerID);
@@ -325,6 +325,7 @@
                                 $('#answer4').css('cursor', 'not-allowed');
                                 $('#answer4').css('background-color', 'grey');
                                 $('#' + answerID).css('background-color', 'green');
+                                $('#' + answerID).prop('disabled', true);
                                 $.ajax({
                                     url: '/ControlPregunta',
                                     method: 'POST',
@@ -358,7 +359,8 @@
                     console.log(error);
                 }
             });
-            $('#correct-btn').click(function () {
+        });
+        $('#correct-btn').click(function () {
                 $('#correct-btn').prop('disabled', true);
                 $.ajax({
                     url: '/ControlPregunta',
@@ -386,7 +388,7 @@
                         document.getElementById('answer3').textContent = numbers[6];
                         document.getElementById('answer4').textContent = numbers[7];
                         ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
-                            $('#' + answerID).click(function () {
+                            $('#' + answerID).off('click').click(function () {
                                 var correctAnswerNumber = numbers[2];
                                 if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
                                     console.log('Correcto: ' + answerID);
@@ -434,23 +436,22 @@
                     }
                 });
             });
-        });
         function getData() {
             $.get('/EstJugadores', function (response) {
                 var EstJugadores = response.EstJugadores;
                 console.log(EstJugadores);
                 document.getElementById('nombre').textContent = EstJugadores[0][1];
-                document.getElementById('nombre1').textContent = EstJugadores[1][1];
-                document.getElementById('nombre2').textContent = EstJugadores[2][1];
-                document.getElementById('nombre3').textContent = EstJugadores[3][1];
                 document.getElementById('puntaje').textContent = EstJugadores[0][2];
+                document.getElementById('nombre1').textContent = EstJugadores[1][1];
                 document.getElementById('puntaje1').textContent = EstJugadores[1][2];
+                document.getElementById('nombre2').textContent = EstJugadores[2][1];
                 document.getElementById('puntaje2').textContent = EstJugadores[2][2];
+                document.getElementById('nombre3').textContent = EstJugadores[3][1];
                 document.getElementById('puntaje3').textContent = EstJugadores[3][2];
             });
         }
         getData();
-        setInterval(getData, 10000);
+        setInterval(getData, 1000);
     </script>
 </body>
 

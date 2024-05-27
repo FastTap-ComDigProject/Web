@@ -16,6 +16,7 @@ global Serial
 global PorcentajeBaterias
 global Usuario
 global UsuariosConectados
+global NUsuariosConectados
 global PuntajeJugador
 global PuntajePregunta
 global Presionaron
@@ -38,6 +39,7 @@ PuestosFinales = [None] * 5
 Conectado = 0
 PreguntaActual = 0
 Turno = 0
+NUsuariosConectados = 0
 
 
 global integer_value
@@ -64,6 +66,7 @@ def IniciarComunicacionSerial():
 def RecepcionSerial():
     global Serial
     global UsuariosConectados
+    global NUsuariosConectados
     global Presionaron
     global Tiempo_en_presionar
     global Posicion
@@ -74,7 +77,7 @@ def RecepcionSerial():
             ByteSerial = int.from_bytes(
                 Serial.read(), "big"
             )  # Leer primer byte entrante
-            print(f"Valor byte: {ByteSerial}")
+            print(f"RecepcionSerial, byte entrante: {ByteSerial}")
 
             if ByteSerial == 0:  # Solicitar lista de usuarios conectados
                 EnvioSerial(0)
@@ -86,7 +89,8 @@ def RecepcionSerial():
                     UsuariosConectados |= 1 << (
                         Usuario
                     )  # Pone en alto un bit especifico
-                    print(f"Usuarios conectados: {UsuariosConectados}")
+                    NUsuariosConectados += 1
+                    print(f"UsuariosConectados: {UsuariosConectados}")
                     cursor_database.execute(
                         """INSERT INTO Estadisticas_Jugadores(
                                             NumeroJugador, Puntaje) VALUES (?,?)""",
@@ -108,7 +112,7 @@ def RecepcionSerial():
                 EnvioSerial(3)
 
             else:
-                print("Error en RecepcionSeriaal")
+                print("Error en RecepcionSerial")
 
 
 HiloRecepcionSerial = threading.Thread(
@@ -119,13 +123,14 @@ HiloRecepcionSerial = threading.Thread(
 def EnvioSerial(var1):
     global Serial
     global UsuariosConectados
+    global NUsuariosConectados
     global Tiempo_inicio_pregunta
     global PreguntaActual
     global Turno
     global Posicion
     global Usuario
 
-    print(f"Enviando con identificador: {var1}")
+    print(f"EnvioSerial, identificador: {var1}")
     if var1 == 0:  # Enviar lista de usuarios conectados
         usuarios_conectados_bytes = (UsuariosConectados).to_bytes(1, "big")
         Serial.write(b"\x00" + usuarios_conectados_bytes)
@@ -170,38 +175,40 @@ def EnvioSerial(var1):
 
     elif var1 == 4:  # Envio turno actual del jugador a responder
         Turno += 1
-        turno_bytes = (Turno).to_bytes(1, "big")
-        print(f"Envio turno actual del jugador a responder, Turno: {Turno}")
-        Serial.write(b"\x04" + turno_bytes)
+        if not (Turno > NUsuariosConectados):
+            turno_bytes = (Turno).to_bytes(1, "big")
+            print(f"Envio turno actual del jugador a responder, Turno: {Turno}")
+            Serial.write(b"\x04" + turno_bytes)
 
     elif var1 == 5:  # Envio a jugador que contesto correctamente
-        cursor_database.execute(
-            """SELECT PuntajePregunta FROM Preguntas_Respuestas 
-                                        WHERE NumeroPregunta=?""",
-            (PreguntaActual,),
-        )
-        PuntajePregunta = cursor_database.fetchone()
-        cursor_database.execute(
-            """SELECT Puntaje FROM Estadisticas_Jugadores 
-                                        WHERE NumeroJugador=?""",
-            (Turno,),
-        )
-        PuntajeJugador = cursor_database.fetchone()
-        cursor_database.execute(
-            f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
-                                        WHERE NumeroJugador = ?""",
-            (PuntajePregunta[0], Turno),
-        )
-        cursor_database.execute(
-            """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
-                                        WHERE NumeroJugador = ?""",
-            (PuntajeJugador[0] + PuntajePregunta[0], Turno),
-        )
-        conn_database.commit()
+        if not (Turno > NUsuariosConectados):
+            cursor_database.execute(
+                """SELECT PuntajePregunta FROM Preguntas_Respuestas 
+                                            WHERE NumeroPregunta=?""",
+                (PreguntaActual,),
+            )
+            PuntajePregunta = cursor_database.fetchone()
+            cursor_database.execute(
+                """SELECT Puntaje FROM Estadisticas_Jugadores 
+                                            WHERE NumeroJugador=?""",
+                (Turno,),
+            )
+            PuntajeJugador = cursor_database.fetchone()
+            cursor_database.execute(
+                f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
+                                            WHERE NumeroJugador = ?""",
+                (PuntajePregunta[0], Turno),
+            )
+            cursor_database.execute(
+                """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
+                                            WHERE NumeroJugador = ?""",
+                (PuntajeJugador[0] + PuntajePregunta[0], Turno),
+            )
+            conn_database.commit()
 
-        print(f"Envio a jugador que contesto correctamente, usuario: {Turno}")
-        usuario_bytes = (Turno).to_bytes(1, "big")
-        Serial.write(b"\x05" + usuario_bytes)
+            print(f"Envio a jugador que contesto correctamente, usuario: {Turno}")
+            usuario_bytes = (Turno).to_bytes(1, "big")
+            Serial.write(b"\x05" + usuario_bytes)
 
     elif var1 == 6:  # Envio de puestos finales
         matriz = [None] * 5
@@ -235,7 +242,7 @@ def EnvioSerial(var1):
             serial.write(b"\x06" + usuario_bytes + posicion_final_bytes + puntaje_bytes)
 
     else:
-        print("error envio serial")
+        print("Error EnvioSerial")
 
 
 # Conexion base de datos
@@ -356,18 +363,16 @@ def ConsultarJugadoresConectados():
     vector = [None] * 5
     for i in range(5):
         vector[i] = (UsuariosConectados >> i) & 1
-    print(f"Vector: {vector}")
     return vector
 
 
 def ConsultarPreguntasRespuestas():
     global PreguntaActual
-    print("database")
     cursor_database.execute(
         "SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (PreguntaActual,)
     )
     var2 = cursor_database.fetchone()
-    print(str(var2))
+    print(f"ConsultarPreguntasRespuestas: {str(var2)}")
     return str(var2)
 
 
@@ -400,7 +405,6 @@ def home():
     if request.method == "POST":
         dato = request.form.get("dato")
         if dato == "EMPEZAR":
-            print("se oprimio empezar")
             HiloRecepcionSerial.start()
             return redirect(url_for("PaginaConexionUsuarios"))
     return render_template("index.html", IniciarComSer=IniciarComSer)
@@ -418,7 +422,6 @@ def IniciarComSer():
 def PaginaConexionUsuarios():
 
     if request.method == "POST":
-        print("se pulso")
         nombre = [None] * 5
         nombre[0] = request.form.get("input1")
         nombre[1] = request.form.get("input2")
@@ -462,7 +465,6 @@ def ControlPregunta():
     if request.method == "POST":
         id = request.form.get("id")
         if id == "SIGUIENTE":
-            print("de control")
             PreguntaActual += 1
             EnvioSerial(2)  # Iniciar nueva pregunta
             EnvioSerial(1)  # Enviar puntaje jugadores
