@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM5"
+Puerto = "COM11"
 
 global Serial
 global PorcentajeBaterias
@@ -464,8 +464,9 @@ def ControlPregunta():
         if id == "SIGUIENTE":
             print("de control")
             PreguntaActual += 1
-            EnvioSerial(2)
-            EnvioSerial(1)
+            EnvioSerial(2)  # Iniciar nueva pregunta
+            EnvioSerial(1)  # Enviar puntaje jugadores
+            EnvioSerial(4)  # Envio turno actual del jugador a responder
             return ConsultarPreguntasRespuestas()
         if id == "BIEN":
             EnvioSerial(5)  # Envio a jugador que contesto correctamente
