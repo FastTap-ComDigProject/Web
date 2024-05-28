@@ -27,6 +27,7 @@ global PreguntaActual
 global Tiempo_inicio_pregunta
 global Tiempo_en_presionar
 global Conectado
+global UsuarioPosicion
 
 UsuariosConectados = (
     0b00000000  # Esta variable almacenara en cada bit los usuarios conectados
@@ -35,6 +36,7 @@ PorcentajeBaterias = [None] * 5
 Presionaron = [0] * 5
 Tiempo_inicio_pregunta = 0
 Tiempo_en_presionar = [0] * 5
+UsuarioPosicion = [0] * 5
 PuestosFinales = [None] * 5
 Conectado = 0
 PreguntaActual = 0
@@ -128,6 +130,7 @@ def EnvioSerial(var1):
     global PreguntaActual
     global Turno
     global Posicion
+    global UsuarioPosicion
     global Usuario
 
     print(f"EnvioSerial, identificador: {var1}")
@@ -154,7 +157,7 @@ def EnvioSerial(var1):
         Turno = 0
         for i in range(5):
             Presionaron[i] = 0
-            Tiempo_en_presionar[i] = 0
+            Tiempo_en_presionar[i] = 9999
 
         cursor_database.execute(
             """SELECT PuntajePregunta FROM Preguntas_Respuestas 
@@ -168,6 +171,7 @@ def EnvioSerial(var1):
             Serial.write(b"\x02" + numero_pregunta_bytes + puntaje_pregunta_bytes)
 
     elif var1 == 3:  # Envio posicion del jugador
+        UsuarioPosicion[Posicion] = Usuario
         usuario_bytes = (Usuario).to_bytes(1, "big")
         posicion_bytes = (Posicion).to_bytes(1, "big")
         print(f"Envio posicion jugador, usuario: {Usuario}")
@@ -191,23 +195,25 @@ def EnvioSerial(var1):
             cursor_database.execute(
                 """SELECT Puntaje FROM Estadisticas_Jugadores 
                                             WHERE NumeroJugador=?""",
-                (Turno,),
+                (UsuarioPosicion[Turno],),
             )
             PuntajeJugador = cursor_database.fetchone()
             cursor_database.execute(
                 f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
                                             WHERE NumeroJugador = ?""",
-                (PuntajePregunta[0], Turno),
+                (PuntajePregunta[0], UsuarioPosicion[Turno]),
             )
             cursor_database.execute(
                 """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
                                             WHERE NumeroJugador = ?""",
-                (PuntajeJugador[0] + PuntajePregunta[0], Turno),
+                (PuntajeJugador[0] + PuntajePregunta[0], UsuarioPosicion[Turno]),
             )
             conn_database.commit()
 
-            print(f"Envio a jugador que contesto correctamente, usuario: {Turno}")
-            usuario_bytes = (Turno).to_bytes(1, "big")
+            print(
+                f"Envio a jugador que contesto correctamente, usuario: {UsuarioPosicion[Turno]}"
+            )
+            usuario_bytes = (UsuarioPosicion[Turno]).to_bytes(1, "big")
             Serial.write(b"\x05" + usuario_bytes)
 
     elif var1 == 6:  # Envio de puestos finales
@@ -479,8 +485,7 @@ def ControlPregunta():
 
 @app.route("/EstJugadores")
 def EstJugadores():
-    EstJugadores = ConsultarEstadisticasJugadores()
-    return jsonify({"EstJugadores": EstJugadores})
+    return jsonify({"EstJugadores": ConsultarEstadisticasJugadores()})
 
 
 if __name__ == "__main__":
