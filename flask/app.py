@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM6"
+Puerto = "COM7"
 
 global Serial
 global PorcentajeBaterias
@@ -22,7 +22,7 @@ global PuntajePregunta
 global Presionaron
 global Posicion
 global Turno
-global PuestosFinales
+global Podio
 global PreguntaActual
 global Tiempo_inicio_pregunta
 global Tiempo_en_presionar
@@ -37,7 +37,7 @@ Presionaron = [0] * 5
 Tiempo_inicio_pregunta = 0
 Tiempo_en_presionar = [0] * 5
 UsuarioPosicion = [0] * 5
-PuestosFinales = [None] * 5
+Podio = [None] * 5
 Conectado = 0
 PreguntaActual = 0
 Turno = 0
@@ -411,8 +411,8 @@ def ConsultarEstadisticasJugadores():
     )  # Ordena la matriz segun el tiempo en presionar y devuelve
 
 
-def ConsultarPuestosFinales():
-    matriz = [None] * 5
+def ConsultarPodio():
+    matriz = [None] * 3
     for i in range(5):
         cursor_database.execute(
             """SELECT NumeroJugador, Nombre, Puntaje FROM
@@ -422,10 +422,10 @@ def ConsultarPuestosFinales():
         fetch_result = cursor_database.fetchone()
         if fetch_result is not None:
             matriz[i] = fetch_result
-    return sorted(
-        matriz, key=lambda x: x[2], reverse=True
-    )
- # Ordena la matriz segun el puntaje mayor y devuelve
+    return sorted(matriz, key=lambda x: x[2], reverse=True)
+
+
+# Ordena la matriz segun el puntaje mayor y devuelve
 
 
 ######################### Funciones para la pagina de Index
@@ -500,7 +500,7 @@ def ControlPregunta():
             Consulta = ConsultarPreguntasRespuestas()
             if Consulta == None:
                 EnvioSerial(6)  # Envio de puestos finales
-                render_template("PuestosFinales.html")
+                render_template("Podio.html")
             EnvioSerial(2)  # Iniciar nueva pregunta
             EnvioSerial(1)  # Enviar puntaje jugadores
             EnvioSerial(4)  # Envio turno actual del jugador a responder
@@ -517,12 +517,10 @@ def EstJugadores():
     return jsonify({"EstJugadores": ConsultarEstadisticasJugadores()})
 
 
-######################### Funciones para la pagina de PuestosFinales
-@app.route("/PuestosFinales.html")
-def PaginaPuestosFinales():
-    return render_template(
-        "PuestosFinales.html", PuestosFinales=ConsultarPuestosFinales()
-    )
+######################### Funciones para la pagina de Podio
+@app.route("/Podio.html")
+def PaginaPodio():
+    return render_template("Podio.html", Podio=ConsultarPodio())
 
 
 if __name__ == "__main__":

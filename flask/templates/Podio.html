@@ -94,15 +94,15 @@
     <div class="podium">
         <div class="third">
             <h2>3º</h2>
-            <span id="tercero">Nombre del Jugador 3</span>
+            <span id="tercero"></span>
         </div>
         <div class="first">
             <h2>1º</h2>
-            <span id="primero">Nombre del Jugador 1</span>
+            <span id="primero"></span>
         </div>
         <div class="second">
             <h2>2º</h2>
-            <span id="segundo">Nombre del Jugador 2</span>
+            <span id="segundo"></span>
         </div>
     </div>
 
@@ -119,7 +119,7 @@
             }, 700);
         });
         
-        fetch('/PuestosFinales.html')
+        fetch('/Podio.html')
             .then(response => response.text())
             .then(data => {
                 console.log(data);
