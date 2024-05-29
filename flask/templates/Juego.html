@@ -301,66 +301,72 @@
                 method: 'POST',
                 data: { id: 'SIGUIENTE' },
                 success: function (data) {
-                    var array = data.slice(1, -1).split(',');
-                    var numbers = array.map(function (item) {
-                        item = item.replace(/['"]+/g, '');
-                        return isNaN(Number(item)) ? item : Number(item);
-                    });
-                    console.log(numbers);
-                    document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
-                    document.getElementById('question').textContent = numbers[3];
-                    document.getElementById('answer1').textContent = numbers[4];
-                    document.getElementById('answer2').textContent = numbers[5];
-                    document.getElementById('answer3').textContent = numbers[6];
-                    document.getElementById('answer4').textContent = numbers[7];
-
-                    ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
-                        $('#' + answerID).off('click').click(function () {
-                            EsposarBotones()
-                            NRespuestaPresionada++;
-                            var correctAnswerNumber = numbers[2];
-                            if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
-                                console.log('Correcto: ' + answerID);
-                                $('#correct-btn').prop('disabled', false);
-                                $('#answer1').css('cursor', 'not-allowed');
-                                $('#answer1').css('background-color', 'grey');
-                                $('#answer2').css('cursor', 'not-allowed');
-                                $('#answer2').css('background-color', 'grey');
-                                $('#answer3').css('cursor', 'not-allowed');
-                                $('#answer3').css('background-color', 'grey');
-                                $('#answer4').css('cursor', 'not-allowed');
-                                $('#answer4').css('background-color', 'grey');
-                                $('#' + answerID).css('background-color', 'green');
-                                $('#' + answerID).prop('disabled', true);
-                                $.ajax({
-                                    url: '/ControlPregunta',
-                                    method: 'POST',
-                                    data: { id: 'BIEN' },
-                                    success: function (data) {
-                                        console.log('Respuesta correcta enviada al backend');
-                                    },
-                                    error: function (error) {
-                                        console.log(error);
-                                    }
-                                });
-                            } else {
-                                console.log('Incorrecto: ' + answerID);
-                                $('#' + answerID).css('background-color', 'red');
-                                $.ajax({
-                                    url: '/ControlPregunta',
-                                    method: 'POST',
-                                    data: { id: 'MAL' },
-                                    success: function (data) {
-                                        console.log('Respuesta correcta enviada al backend');
-                                    },
-                                    error: function (error) {
-                                        console.log(error);
-                                    }
-                                });
-                            }
+                    if (data == "SinPreguntas"){
+                        console.log("con null");
+                        window.location.href = "/Podio.html";
+                    }else{
+                        console.log("sin null");
+                        var array = data.slice(1, -1).split(',');
+                        var numbers = array.map(function (item) {
+                            item = item.replace(/['"]+/g, '');
+                            return isNaN(Number(item)) ? item : Number(item);
                         });
-                    });
-                    checkEstJugadores();
+                        console.log(numbers);
+                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
+                        document.getElementById('question').textContent = numbers[3];
+                        document.getElementById('answer1').textContent = numbers[4];
+                        document.getElementById('answer2').textContent = numbers[5];
+                        document.getElementById('answer3').textContent = numbers[6];
+                        document.getElementById('answer4').textContent = numbers[7];
+
+                        ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
+                            $('#' + answerID).off('click').click(function () {
+                                EsposarBotones()
+                                NRespuestaPresionada++;
+                                var correctAnswerNumber = numbers[2];
+                                if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
+                                    console.log('Correcto: ' + answerID);
+                                    $('#correct-btn').prop('disabled', false);
+                                    $('#answer1').css('cursor', 'not-allowed');
+                                    $('#answer1').css('background-color', 'grey');
+                                    $('#answer2').css('cursor', 'not-allowed');
+                                    $('#answer2').css('background-color', 'grey');
+                                    $('#answer3').css('cursor', 'not-allowed');
+                                    $('#answer3').css('background-color', 'grey');
+                                    $('#answer4').css('cursor', 'not-allowed');
+                                    $('#answer4').css('background-color', 'grey');
+                                    $('#' + answerID).css('background-color', 'green');
+                                    $('#' + answerID).prop('disabled', true);
+                                    $.ajax({
+                                        url: '/ControlPregunta',
+                                        method: 'POST',
+                                        data: { id: 'BIEN' },
+                                        success: function (data) {
+                                            console.log('Respuesta correcta enviada al backend');
+                                        },
+                                        error: function (error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                } else {
+                                    console.log('Incorrecto: ' + answerID);
+                                    $('#' + answerID).css('background-color', 'red');
+                                    $.ajax({
+                                        url: '/ControlPregunta',
+                                        method: 'POST',
+                                        data: { id: 'MAL' },
+                                        success: function (data) {
+                                            console.log('Respuesta correcta enviada al backend');
+                                        },
+                                        error: function (error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                        checkEstJugadores();
+                    };
                 },
                 error: function (error) {
                     console.log(error);
@@ -376,77 +382,78 @@
                 method: 'POST',
                 data: { id: 'SIGUIENTE' },
                 success: function (data) {
-                    $('#answer1').css('cursor', 'default');
-                    $('#answer1').css('background-color', '#7b1fa2');
-                    $('#answer2').css('cursor', 'default');
-                    $('#answer2').css('background-color', '#7b1fa2');
-                    $('#answer3').css('cursor', 'default');
-                    $('#answer3').css('background-color', '#7b1fa2');
-                    $('#answer4').css('cursor', 'default');
-                    $('#answer4').css('background-color', '#7b1fa2');
-                    var array = data.slice(1, -1).split(',');
-                    var numbers = array.map(function (item) {
-                        item = item.replace(/['"]+/g, '');
-                        return isNaN(Number(item)) ? item : Number(item);
-                    });
-                    console.log(numbers);
-                    document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
-                    document.getElementById('question').textContent = numbers[3];
-                    document.getElementById('answer1').textContent = numbers[4];
-                    document.getElementById('answer2').textContent = numbers[5];
-                    document.getElementById('answer3').textContent = numbers[6];
-                    document.getElementById('answer4').textContent = numbers[7];
-                    ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
-                        $('#' + answerID).off('click').click(function () {
-                            var correctAnswerNumber = numbers[2];
-                            if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
-                                console.log('Correcto: ' + answerID);
-                                $('#correct-btn').prop('disabled', false);
-                                $('#answer1').css('cursor', 'not-allowed');
-                                $('#answer1').css('background-color', 'grey');
-                                $('#answer2').css('cursor', 'not-allowed');
-                                $('#answer2').css('background-color', 'grey');
-                                $('#answer3').css('cursor', 'not-allowed');
-                                $('#answer3').css('background-color', 'grey');
-                                $('#answer4').css('cursor', 'not-allowed');
-                                $('#answer4').css('background-color', 'grey');
-                                $('#' + answerID).css('background-color', 'green');
-                                $.ajax({
-                                    url: '/ControlPregunta',
-                                    method: 'POST',
-                                    data: { id: 'BIEN' },
-                                    success: function (data) {
-                                        console.log('Respuesta correcta enviada al backend');
-                                    },
-                                    error: function (error) {
-                                        console.log(error);
-                                    }
-                                });
-                            } else {
-                                console.log('Incorrecto: ' + answerID);
-                                $('#' + answerID).css('background-color', 'red');
-                                $.ajax({
-                                    url: '/ControlPregunta',
-                                    method: 'POST',
-                                    data: { id: 'MAL' },
-                                    success: function (data) {
-                                        console.log('Respuesta correcta enviada al backend');
-                                    },
-                                    error: function (error) {
-                                        console.log(error);
-                                    }
-                                });
-                            }
+                    if (data == "SinPreguntas"){
+                        console.log("con null");
+                        window.location.href = "/Podio.html";
+                    }else{
+                        console.log("sin null");
+                        $('#answer1').css('cursor', 'default');
+                        $('#answer1').css('background-color', '#7b1fa2');
+                        $('#answer2').css('cursor', 'default');
+                        $('#answer2').css('background-color', '#7b1fa2');
+                        $('#answer3').css('cursor', 'default');
+                        $('#answer3').css('background-color', '#7b1fa2');
+                        $('#answer4').css('cursor', 'default');
+                        $('#answer4').css('background-color', '#7b1fa2');
+                        var array = data.slice(1, -1).split(',');
+                        var numbers = array.map(function (item) {
+                            item = item.replace(/['"]+/g, '');
+                            return isNaN(Number(item)) ? item : Number(item);
                         });
-                    });
+                        console.log(numbers);
+                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
+                        document.getElementById('question').textContent = numbers[3];
+                        document.getElementById('answer1').textContent = numbers[4];
+                        document.getElementById('answer2').textContent = numbers[5];
+                        document.getElementById('answer3').textContent = numbers[6];
+                        document.getElementById('answer4').textContent = numbers[7];
+                        ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
+                            $('#' + answerID).off('click').click(function () {
+                                var correctAnswerNumber = numbers[2];
+                                if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
+                                    console.log('Correcto: ' + answerID);
+                                    $('#correct-btn').prop('disabled', false);
+                                    $('#answer1').css('cursor', 'not-allowed');
+                                    $('#answer1').css('background-color', 'grey');
+                                    $('#answer2').css('cursor', 'not-allowed');
+                                    $('#answer2').css('background-color', 'grey');
+                                    $('#answer3').css('cursor', 'not-allowed');
+                                    $('#answer3').css('background-color', 'grey');
+                                    $('#answer4').css('cursor', 'not-allowed');
+                                    $('#answer4').css('background-color', 'grey');
+                                    $('#' + answerID).css('background-color', 'green');
+                                    $.ajax({
+                                        url: '/ControlPregunta',
+                                        method: 'POST',
+                                        data: { id: 'BIEN' },
+                                        success: function (data) {
+                                            console.log('Respuesta correcta enviada al backend');
+                                        },
+                                        error: function (error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                } else {
+                                    console.log('Incorrecto: ' + answerID);
+                                    $('#' + answerID).css('background-color', 'red');
+                                    $.ajax({
+                                        url: '/ControlPregunta',
+                                        method: 'POST',
+                                        data: { id: 'MAL' },
+                                        success: function (data) {
+                                            console.log('Respuesta correcta enviada al backend');
+                                        },
+                                        error: function (error) {
+                                            console.log(error);
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    };
                 },
                 error: function (error) {
-                    if (error.status === 400) {
-                        window.location.href = "/Podio.html";
-                        console.log("se redirecciono");
-                    } else {
-                        console.log(error);
-                    }
+                    console.log(error);
                 }
             });
         });

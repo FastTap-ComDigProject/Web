@@ -499,10 +499,10 @@ def ControlPregunta():
         if id == "SIGUIENTE":
             PreguntaActual += 1
             Consulta = ConsultarPreguntasRespuestas()
-            if Consulta == None:
-                EnvioSerial(6)  # Envio de puestos finales
+            if Consulta == None:  # Cuando se acaban las preguntas
+                # EnvioSerial(6)  # Envio de puestos finales
                 print("podio")
-                render_template("Podio.html")
+                return "SinPreguntas"
             EnvioSerial(2)  # Iniciar nueva pregunta
             EnvioSerial(1)  # Enviar puntaje jugadores
             EnvioSerial(4)  # Envio turno actual del jugador a responder
