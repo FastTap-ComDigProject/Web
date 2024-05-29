@@ -118,18 +118,16 @@
                 document.querySelector('.first').classList.add('visible');
             }, 700);
         });
-        
-        fetch('/Podio.html')
-            .then(response => response.text())
+        fetch('/Podio')
+            .then(response => response.json())
             .then(data => {
                 console.log(data);
-                document.getElementById('primero').textContent = data[0][1];
-                document.getElementById('segundo').textContent = data[1][1];
-                document.getElementById('tercero').textContent = data[2][1];
+                document.getElementById('primero').textContent = data[0][1] || 'No disponible';
+                document.getElementById('segundo').textContent = data[1][1] || 'No disponible';
+                document.getElementById('tercero').textContent = data[2][1] || 'No disponible';
             })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+            .catch(error => console.error('Error:', error));
+
     </script>
 </body>
 

@@ -412,7 +412,7 @@ def ConsultarEstadisticasJugadores():
 
 
 def ConsultarPodio():
-    matriz = [None] * 3
+    matriz = [None] * 5
     for i in range(5):
         cursor_database.execute(
             """SELECT NumeroJugador, Nombre, Puntaje FROM
@@ -422,7 +422,9 @@ def ConsultarPodio():
         fetch_result = cursor_database.fetchone()
         if fetch_result is not None:
             matriz[i] = fetch_result
-    return sorted(matriz, key=lambda x: x[2], reverse=True)
+    return sorted(
+        matriz, key=lambda x: x[2] if x is not None else float("-inf"), reverse=True
+    )
 
 
 # Ordena la matriz segun el puntaje mayor y devuelve
@@ -450,7 +452,6 @@ def IniciarComSer():
 ######################### Funciones para la pagina de ConexionUsuarios
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])
 def PaginaConexionUsuarios():
-
     if request.method == "POST":
         nombre = [None] * 5
         nombre[0] = request.form.get("input1")
@@ -500,6 +501,7 @@ def ControlPregunta():
             Consulta = ConsultarPreguntasRespuestas()
             if Consulta == None:
                 EnvioSerial(6)  # Envio de puestos finales
+                print("podio")
                 render_template("Podio.html")
             EnvioSerial(2)  # Iniciar nueva pregunta
             EnvioSerial(1)  # Enviar puntaje jugadores
@@ -518,9 +520,16 @@ def EstJugadores():
 
 
 ######################### Funciones para la pagina de Podio
-@app.route("/Podio.html")
-def PaginaPodio():
-    return render_template("Podio.html", Podio=ConsultarPodio())
+@app.route("/Podio.html", methods=["GET", "POST"])
+def Podio():
+    data = ConsultarPodio()
+    return render_template("Podio.html", data=data)
+
+
+@app.route("/Podio")
+def PodioData():
+    data = ConsultarPodio()
+    return jsonify({"data": data})
 
 
 if __name__ == "__main__":

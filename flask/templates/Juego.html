@@ -441,7 +441,12 @@
                     });
                 },
                 error: function (error) {
-                    console.log(error);
+                    if (error.status === 400) {
+                        window.location.href = "/Podio.html";
+                        console.log("se redirecciono");
+                    } else {
+                        console.log(error);
+                    }
                 }
             });
         });
