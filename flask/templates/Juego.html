@@ -291,14 +291,9 @@
         </div>
     </div>
     <script>
-        let EstJugadores;
+        let NRespuestaPresionada = 0;
         $(document).ready(function () {
-            let EstJugadores;
-            ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
-                $('#' + answerID).css('cursor', 'not-allowed');
-                $('#' + answerID).css('pointer-events', 'none');
-            });
-            if(EstJugadores[0][3] == 1 || [1][3])
+            EsposarBotones();
 
             $('#correct-btn').prop('disabled', true);
             $.ajax({
@@ -321,6 +316,8 @@
 
                     ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
                         $('#' + answerID).off('click').click(function () {
+                            EsposarBotones()
+                            NRespuestaPresionada++;
                             var correctAnswerNumber = numbers[2];
                             if (correctAnswerNumber === parseInt(answerID.replace('answer', ''))) {
                                 console.log('Correcto: ' + answerID);
@@ -371,6 +368,8 @@
             });
         });
         $('#correct-btn').click(function () {
+            EsposarBotones()
+            NRespuestaPresionada = 0;
             $('#correct-btn').prop('disabled', true);
             $.ajax({
                 url: '/ControlPregunta',
@@ -450,6 +449,8 @@
             $.get('/EstJugadores', function (response) {
                 EstJugadores = response.EstJugadores;
                 console.log(EstJugadores);
+                console.log('NRespuestaPresionada: ' + NRespuestaPresionada);
+                QuitarEsposasBotones()
                 document.getElementById('nombre').textContent = EstJugadores[0][1];
                 document.getElementById('puntaje').textContent = EstJugadores[0][2];
                 document.getElementById('nombre1').textContent = EstJugadores[1][1];
@@ -458,20 +459,27 @@
                 document.getElementById('puntaje2').textContent = EstJugadores[2][2];
                 document.getElementById('nombre3').textContent = EstJugadores[3][1];
                 document.getElementById('puntaje3').textContent = EstJugadores[3][2];
-                for (let i = 0; i < EstJugadores.length; i++) {
-                    if (EstJugadores[i][3] === 1) { // Si encuentra un 1 en la columna 3
-                        console.log(EstJugadores[i][3]);
-                        ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
-                            $('#' + answerID).css('cursor', 'auto');
-                            $('#' + answerID).css('pointer-events', 'auto');
-                        });
-                        break;
-                    }
-                }
             });
         }
         getData();
         setInterval(getData, 1000);
+        function EsposarBotones() {
+            ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
+                $('#' + answerID).css('cursor', 'not-allowed');
+                $('#' + answerID).css('pointer-events', 'none');
+            });
+        }
+        function QuitarEsposasBotones() {
+            console.log('QuitarEsposasBotones');
+            if (EstJugadores[NRespuestaPresionada][3] === 1) { // Si encuentra un 1 en la columna 3
+                console.log('Encuentra 1 en la columna 3');
+                console.log(EstJugadores[NRespuestaPresionada][3]);
+                ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
+                    $('#' + answerID).css('cursor', 'auto');
+                    $('#' + answerID).css('pointer-events', 'auto');
+                });
+            }
+        }
     </script>
 </body>
 
