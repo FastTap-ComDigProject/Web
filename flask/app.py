@@ -254,6 +254,7 @@ def EnvioSerial(var1):
 # Conexion base de datos
 conn_database = sqlite3.connect("database.db", check_same_thread=False)
 cursor_database = conn_database.cursor()
+cursor_EstadisticasJugadores = conn_database.cursor()
 
 # Eliminar la tabla Estadisticas_Jugadores
 cursor_database.execute("DROP TABLE IF EXISTS Estadisticas_Jugadores")
@@ -388,12 +389,12 @@ def ConsultarEstadisticasJugadores():
 
     matriz = [None] * 5
     for i in range(5):
-        cursor_database.execute(
+        cursor_EstadisticasJugadores.execute(
             """SELECT NumeroJugador, Nombre, Puntaje FROM
                                 Estadisticas_Jugadores WHERE NumeroJugador=?""",
             (i,),
         )
-        fetch_result = cursor_database.fetchone()
+        fetch_result = cursor_EstadisticasJugadores.fetchone()
         if fetch_result is not None:
             matriz[i] = fetch_result + tuple(
                 [
