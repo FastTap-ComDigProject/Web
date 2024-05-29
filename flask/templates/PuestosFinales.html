@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podio de Ganadores</title>
+    <style>
+        @font-face {
+            font-family: 'Retro Gaming';
+            src: url('retrogaming.ttf') format('truetype');
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                /* Elemento completamente transparente al inicio */
+            }
+
+            to {
+                opacity: 1;
+                /* Elemento completamente visible al final */
+            }
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #7b68ee;
+            font-family: 'Retro Gaming', Arial, sans-serif;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+        }
+
+        .podium div {
+            background-color: #4b0082;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            /* Elemento inicialmente invisible */
+            animation: fade-in 1s forwards;
+            /* Aplica la animación, pero no se ejecuta hasta que se añada la clase .visible */
+        }
+
+        .podium div h2 {
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .first {
+            height: 150px;
+        }
+
+        .second {
+            height: 100px;
+        }
+
+        .third {
+            height: 75px;
+        }
+
+        .podium div span {
+            display: block;
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #ffffff;
+        }
+
+        .visible {
+            animation: fade-in 1s forwards;
+            /* Ejecuta la animación de desvanecimiento */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>¡GANADOR!</h1>
+    <div class="podium">
+        <div class="third">
+            <h2>3º</h2>
+            <span id="tercero">Nombre del Jugador 3</span>
+        </div>
+        <div class="first">
+            <h2>1º</h2>
+            <span id="primero">Nombre del Jugador 1</span>
+        </div>
+        <div class="second">
+            <h2>2º</h2>
+            <span id="segundo">Nombre del Jugador 2</span>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.third').classList.add('visible');
+            }, 300);
+            setTimeout(() => {
+                document.querySelector('.second').classList.add('visible');
+            }, 500);
+            setTimeout(() => {
+                document.querySelector('.first').classList.add('visible');
+            }, 700);
+        });
+        
+        fetch('/PuestosFinales.html')
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                document.getElementById('primero').textContent = data[0][1];
+                document.getElementById('segundo').textContent = data[1][1];
+                document.getElementById('tercero').textContent = data[2][1];
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+
+</html>

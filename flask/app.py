@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 Baudios = 115200
-Puerto = "COM7"
+Puerto = "COM6"
 
 global Serial
 global PorcentajeBaterias
@@ -412,7 +412,7 @@ def ConsultarEstadisticasJugadores():
 
 
 def ConsultarPuestosFinales():
-    matriz = [None] * 3
+    matriz = [None] * 5
     for i in range(5):
         cursor_database.execute(
             """SELECT NumeroJugador, Nombre, Puntaje FROM
@@ -424,7 +424,8 @@ def ConsultarPuestosFinales():
             matriz[i] = fetch_result
     return sorted(
         matriz, key=lambda x: x[2], reverse=True
-    )  # Ordena la matriz segun el puntaje mayor y devuelve
+    )
+ # Ordena la matriz segun el puntaje mayor y devuelve
 
 
 ######################### Funciones para la pagina de Index
