@@ -379,8 +379,12 @@ def ConsultarPreguntasRespuestas():
         "SELECT * FROM Preguntas_Respuestas WHERE NumeroPregunta=?", (PreguntaActual,)
     )
     var2 = cursor_database.fetchone()
-    print(f"ConsultarPreguntasRespuestas: {str(var2)}")
-    return str(var2)
+    if var2 is not None:
+        print(f"ConsultarPreguntasRespuestas: {str(var2)}")
+        return str(var2)
+    else:  # Cuando no hay otra pregunta disponible
+        print(f"No hay mas preguntas: {str(var2)}")
+        return None
 
 
 def ConsultarEstadisticasJugadores():
@@ -407,6 +411,23 @@ def ConsultarEstadisticasJugadores():
     )  # Ordena la matriz segun el tiempo en presionar y devuelve
 
 
+def ConsultarPuestosFinales():
+    matriz = [None] * 3
+    for i in range(5):
+        cursor_database.execute(
+            """SELECT NumeroJugador, Nombre, Puntaje FROM
+                                Estadisticas_Jugadores WHERE NumeroJugador=?""",
+            (i,),
+        )
+        fetch_result = cursor_database.fetchone()
+        if fetch_result is not None:
+            matriz[i] = fetch_result
+    return sorted(
+        matriz, key=lambda x: x[2], reverse=True
+    )  # Ordena la matriz segun el puntaje mayor y devuelve
+
+
+######################### Funciones para la pagina de Index
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
@@ -425,6 +446,7 @@ def IniciarComSer():
     return jsonify({"Conectado": Conectado})
 
 
+######################### Funciones para la pagina de ConexionUsuarios
 @app.route("/ConexionUsuarios.html", methods=["GET", "POST"])
 def PaginaConexionUsuarios():
 
@@ -461,6 +483,7 @@ def VectConUsu():
     return jsonify({"JugadoresConectados": ConsultarJugadoresConectados()})
 
 
+######################### Funciones para la pagina de Juego
 @app.route("/Juego.html", methods=["GET", "POST"])
 def PaginaJuego():
     return render_template("Juego.html", EstJugadores=EstJugadores)
@@ -473,10 +496,14 @@ def ControlPregunta():
         id = request.form.get("id")
         if id == "SIGUIENTE":
             PreguntaActual += 1
+            Consulta = ConsultarPreguntasRespuestas()
+            if Consulta == None:
+                EnvioSerial(6)  # Envio de puestos finales
+                render_template("PuestosFinales.html")
             EnvioSerial(2)  # Iniciar nueva pregunta
             EnvioSerial(1)  # Enviar puntaje jugadores
             EnvioSerial(4)  # Envio turno actual del jugador a responder
-            return ConsultarPreguntasRespuestas()
+            return Consulta
         if id == "BIEN":
             EnvioSerial(5)  # Envio a jugador que contesto correctamente
         if id == "MAL":
@@ -487,6 +514,12 @@ def ControlPregunta():
 @app.route("/EstJugadores")
 def EstJugadores():
     return jsonify({"EstJugadores": ConsultarEstadisticasJugadores()})
+
+
+######################### Funciones para la pagina de PuestosFinales
+@app.route("/PuestosFinales.html")
+def PaginaPuestosFinales():
+    return ConsultarPuestosFinales()
 
 
 if __name__ == "__main__":
