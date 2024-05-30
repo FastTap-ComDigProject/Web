@@ -365,8 +365,23 @@ def CargarPreguntasRespuestas(dottxt):  #
 
 
 def QuitarPuntos(var1):
-
-    return None
+    cursor_database.execute(
+        """SELECT Puntaje FROM Estadisticas_Jugadores 
+                                            WHERE NumeroJugador=?""",
+        (UsuarioPosicion[Turno],),
+    )
+    PuntajeJugador = cursor_database.fetchone()
+    cursor_database.execute(
+        f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
+                                            WHERE NumeroJugador = ?""",
+        (-var1, UsuarioPosicion[Turno]),
+    )
+    cursor_database.execute(
+        """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
+                                            WHERE NumeroJugador = ?""",
+        (PuntajeJugador[0] - var1, UsuarioPosicion[Turno]),
+    )
+    conn_database.commit()
 
 
 def ConsultarJugadoresConectados():
