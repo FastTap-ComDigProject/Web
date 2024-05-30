@@ -106,12 +106,15 @@ def RecepcionSerial():
                     PorcentajeBaterias[Usuario] = int.from_bytes(Serial.read(), "big")
 
             elif ByteSerial == 3:  # Recibe pulso de boton
-                Posicion += 1
                 if Serial.in_waiting > 0:
                     Usuario = int.from_bytes(Serial.read(), "big")
-                    Presionaron[Usuario] = 1
-                    Tiempo_en_presionar[Usuario] = time.time() - Tiempo_inicio_pregunta
-                EnvioSerial(3)
+                    if Presionaron[Usuario] == 0:
+                        Presionaron[Usuario] = 1
+                        Posicion += 1
+                        Tiempo_en_presionar[Usuario] = (
+                            time.time() - Tiempo_inicio_pregunta
+                        )
+                        EnvioSerial(3)
 
             else:
                 print("Error en RecepcionSerial")
