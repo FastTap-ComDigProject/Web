@@ -364,6 +364,11 @@ def CargarPreguntasRespuestas(dottxt):  #
     conn_database.commit()  # Guarda todos los cambios realizados a la base de datos
 
 
+def QuitarPuntos():
+
+    return None
+
+
 def ConsultarJugadoresConectados():
     global UsuariosConectados
     vector = [None] * 5
@@ -509,6 +514,7 @@ def ControlPregunta():
         if id == "BIEN":
             EnvioSerial(5)  # Envio a jugador que contesto correctamente
         if id == "MAL":
+            QuitarPuntos(50)  # Cuando responde mal se le penaliza
             EnvioSerial(4)  # Envio turno actual del jugador a responder
     return "Solicitud no válida", 400
 
