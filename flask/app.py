@@ -375,7 +375,7 @@ def QuitarPuntos(var1):
     cursor_database.execute(
         f"""UPDATE Estadisticas_Jugadores SET Pregunta{PreguntaActual} = ? 
                                             WHERE NumeroJugador = ?""",
-        (PuntajeJugador - NuevoPuntaje, UsuarioPosicion[Turno]),
+        (PuntajeJugador[0] - NuevoPuntaje, UsuarioPosicion[Turno]),
     )
     cursor_database.execute(
         """UPDATE Estadisticas_Jugadores SET Puntaje = ? 
