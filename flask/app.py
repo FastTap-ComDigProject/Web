@@ -364,7 +364,7 @@ def CargarPreguntasRespuestas(dottxt):  #
     conn_database.commit()  # Guarda todos los cambios realizados a la base de datos
 
 
-def QuitarPuntos():
+def QuitarPuntos(var1):
 
     return None
 
