@@ -122,9 +122,21 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    document.getElementById('primero').textContent = data[0][1];
-                    document.getElementById('segundo').textContent = data[1][1];
-                    document.getElementById('tercero').textContent = data[2][1];
+                    if (data.data[0] != null) {
+                        document.getElementById('primero').textContent = data.data[0][1];
+                    } else {
+                        document.getElementById('primero').textContent = "Nadie";
+                    }
+                    if (data.data[1] != null) {
+                        document.getElementById('segundo').textContent = data.data[1][1];
+                    } else {
+                        document.getElementById('segundo').textContent = "Nadie";
+                    }
+                    if (data.data[2] != null) {
+                        document.getElementById('tercero').textContent = data.data[2][1];
+                    } else {
+                        document.getElementById('tercero').textContent = "Nadie";
+                    }
                 })
                 .catch(error => console.error('Error:', error));
         });
