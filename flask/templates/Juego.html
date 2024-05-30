@@ -226,7 +226,6 @@
                         <div class="icono-container">
                             <img src="{{ url_for('static', filename='nave.png') }}" alt="Icono jugador 1" class="icono">
                         </div>
-                        <h1 id="puntos"></h1>
                         <div class="datos">
                             <div class="nombre-puntaje">
                                 <div class="nombre" id="nombre"></div>
@@ -313,7 +312,7 @@
                             return isNaN(Number(item)) ? item : Number(item);
                         });
                         console.log(numbers);
-                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
+                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "Por" + numbers[1] + "Puntos" + "!";
                         document.getElementById('question').textContent = numbers[3];
                         document.getElementById('answer1').textContent = numbers[4];
                         document.getElementById('answer2').textContent = numbers[5];
@@ -401,13 +400,12 @@
                             return isNaN(Number(item)) ? item : Number(item);
                         });
                         console.log(numbers);
-                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "!";
+                        document.getElementById('numeroPregunta').textContent = "¡PREGUNTA NO. " + numbers[0] + "Por"+ numbers[1] + "Puntos" + "!";
                         document.getElementById('question').textContent = numbers[3];
                         document.getElementById('answer1').textContent = numbers[4];
                         document.getElementById('answer2').textContent = numbers[5];
                         document.getElementById('answer3').textContent = numbers[6];
                         document.getElementById('answer4').textContent = numbers[7];
-                        document.getElementById('puntos').textContent = numbers[1];
                         ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
                             $('#' + answerID).off('click').click(function () {
                                 var correctAnswerNumber = numbers[2];
