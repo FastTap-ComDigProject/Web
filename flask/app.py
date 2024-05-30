@@ -217,35 +217,31 @@ def EnvioSerial(var1):
             Serial.write(b"\x05" + usuario_bytes)
 
     elif var1 == 6:  # Envio de puestos finales
+        Posicion = 0
         matriz = [None] * 5
         for i in range(5):
             cursor_database.execute(
-                """SELECT Puntaje FROM Estadisticas_Jugadores 
-                                                WHERE NumeroJugador=?""",
-                (Usuario,),
+                """SELECT NumeroJugador, Puntaje FROM
+                                    Estadisticas_Jugadores WHERE NumeroJugador=?""",
+                (i,),
             )
-            matriz[i] = list(cursor_database.fetchone())
+            fetch_result = cursor_database.fetchone()
+            if fetch_result is not None:
+                matriz[i] = fetch_result
+        matriz = sorted(
+            matriz, key=lambda x: x[1] if x is not None else float("-inf"), reverse=True
+        )
 
-        matriz.sort(key=lambda x: x[0], reverse=True)
+        for i in range(5):
+            if matriz[i] is not None:
+                usuario_bytes = (matriz[i][0]).to_bytes(1, "big")
+                posicion_final_bytes = (i + 1).to_bytes(1, "big")
+                puntaje_bytes = (int(matriz[i][1] / 50)).to_bytes(1, "big")
 
-        posicion = 1
-        ultimo_valor = matriz[0][0]
-
-        for i in range(len(matriz)):
-            # Si el valor actual es diferente al último valor visto, incrementamos la posición
-            if matriz[i][0] != ultimo_valor:
-                posicion += 1
-                ultimo_valor = matriz[i][0]
-            # Agregamos la posición a la fila actual
-            matriz[i].append(posicion)
-
-        for Usuario in range(5):
-            usuario_bytes = (Usuario).to_bytes(1, "big")
-            posicion_final_bytes = (matriz[Usuario][1]).to_bytes(1, "big")
-            puntaje_bytes = (matriz[Usuario][0]).to_bytes(1, "big")
-
-            # Enviamos los datos
-            serial.write(b"\x06" + usuario_bytes + posicion_final_bytes + puntaje_bytes)
+                # Enviamos los datos
+                Serial.write(
+                    b"\x06" + usuario_bytes + posicion_final_bytes + puntaje_bytes
+                )
 
     else:
         print("Error EnvioSerial")
@@ -500,7 +496,7 @@ def ControlPregunta():
             PreguntaActual += 1
             Consulta = ConsultarPreguntasRespuestas()
             if Consulta == None:  # Cuando se acaban las preguntas
-                # EnvioSerial(6)  # Envio de puestos finales
+                EnvioSerial(6)  # Envio de puestos finales
                 print("podio")
                 return "SinPreguntas"
             EnvioSerial(2)  # Iniciar nueva pregunta
