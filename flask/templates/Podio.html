@@ -127,19 +127,19 @@
                     console.log(data);
                     if (data.data[0] != null) {
                         document.getElementById('primero').textContent = data.data[0][1];
-                        document.getElementById('puntaje1').textContent = data.data[0][0];
+                        document.getElementById('puntaje1').textContent = data.data[0][2];
                     } else {
                         document.getElementById('primero').textContent = "Nadie";
                     }
                     if (data.data[1] != null) {
                         document.getElementById('segundo').textContent = data.data[1][1];
-                        document.getElementById('puntaje2').textContent = data.data[1][0];
+                        document.getElementById('puntaje2').textContent = data.data[1][2];
                     } else {
                         document.getElementById('segundo').textContent = "Nadie";
                     }
                     if (data.data[2] != null) {
                         document.getElementById('tercero').textContent = data.data[2][1];
-                        document.getElementById('puntaje3').textContent = data.data[2][0];
+                        document.getElementById('puntaje3').textContent = data.data[2][2];
                     } else {
                         document.getElementById('tercero').textContent = "Nadie";
                     }
