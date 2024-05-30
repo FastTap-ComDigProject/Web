@@ -182,7 +182,7 @@
         button:hover,
         .correcto-btn:hover,
         .error-btn:hover {
-            background-color: #7b1fa2;
+            background-color: grey;
             /* Morado más oscuro al pasar el ratón */
         }
 
@@ -485,7 +485,10 @@
             if (EstJugadores[NRespuestaPresionada][3] === 1) { // Si encuentra un 1 en la columna 3
                 console.log('Encuentra 1 en la columna 3');
                 console.log(EstJugadores[NRespuestaPresionada][3]);
-                $('#nombre').css('color', 'green');
+                $('#nombre').css('background-color', 'green');
+                $('#nombre1').css('background-color', '#9c27b0');
+                $('#nombre2').css('background-color', '#9c27b0');
+                $('#nombre2').css('background-color', '#9c27b0');
                 ['answer1', 'answer2', 'answer3', 'answer4'].forEach(function (answerID) {
                     $('#' + answerID).css('cursor', 'auto');
                     $('#' + answerID).css('pointer-events', 'auto');
